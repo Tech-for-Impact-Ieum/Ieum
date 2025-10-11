@@ -1,7 +1,8 @@
 # 이음
 
+`npm install` - 사용된 package 다운로드
 
-`npm run dev` - [http://localhost:3000](http://localhost:3000)에서 확인
+`npm run dev` - 로컬에서 웹 띄우기: [http://localhost:3000](http://localhost:3000)에서 확인
 
 
 ### References

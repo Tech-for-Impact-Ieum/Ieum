@@ -12,7 +12,7 @@ import { Message } from '@/lib/interface'
 import { ChatHeader } from '@/components/Header'
 import { ChatElement } from '@/components/Chat'
 
-export default function ChatRoomPage({ params }: { params: { id: string } }) {
+export default function ChatRoomPage() {
   const [messages, setMessages] = useState<Message[]>(sampleMessages)
   const [inputMessage, setInputMessage] = useState('')
   const [showVoiceModal, setShowVoiceModal] = useState(false)

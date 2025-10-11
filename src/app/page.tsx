@@ -20,7 +20,7 @@ export default function HomePage() {
       <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
       {/* Chat Room List */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pb-16">
         {filteredRooms.map((room) => (
           <Link
             key={room.id}

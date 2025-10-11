@@ -19,8 +19,18 @@ export default function ChatRoomPage({ params }: { params: { id: string } }) {
   const [showEmojiModal, setShowEmojiModal] = useState(false)
   const [showQuickResponseModal, setShowQuickResponseModal] = useState(false)
 
+  // Composition state for IME input
+  const [isComposing, setIsComposing] = useState(false)
+  const handleCompositionStart = () => {
+    setIsComposing(true)
+  }
+  const handleCompositionEnd = () => {
+    setIsComposing(false)
+  }
+
   const handleSendMessage = () => {
-    if (inputMessage.trim()) {
+    console.log('inputMessage', inputMessage)
+    if (inputMessage.trim() && !isComposing) {
       const newMessage: Message = {
         id: Date.now().toString(),
         text: inputMessage,
@@ -75,6 +85,8 @@ export default function ChatRoomPage({ params }: { params: { id: string } }) {
                 }
               }}
               className="flex-1"
+              onCompositionStart={handleCompositionStart}
+              onCompositionEnd={handleCompositionEnd}
             />
             <Button
               size="icon"

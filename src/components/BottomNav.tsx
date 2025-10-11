@@ -8,6 +8,7 @@ import { cn } from '../lib/utils'
 function BottomNav() {
   const pathname = usePathname()
 
+  // TODO: move to lib(util)
   const navItems = [
     { href: '/friends', label: '친구', icon: Users },
     { href: '/', label: '채팅', icon: MessageCircle },
@@ -28,7 +29,7 @@ function BottomNav() {
               className={cn(
                 'flex flex-1 flex-col items-center gap-1 py-3 text-xs transition-colors',
                 isActive
-                  ? 'text-foreground'
+                  ? 'text-foreground bg-muted/100 font-semibold'
                   : 'text-muted-foreground hover:text-foreground',
               )}
             >

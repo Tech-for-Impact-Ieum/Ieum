@@ -10,6 +10,7 @@ interface QuickResponseModalProps {
   onOpenChange: (open: boolean) => void
 }
 
+// FIXME: onOpenChange is not working properly
 export function QuickResponseModal({
   open,
   onOpenChange,

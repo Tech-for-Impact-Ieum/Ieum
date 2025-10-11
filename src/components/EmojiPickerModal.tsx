@@ -26,7 +26,7 @@ export function EmojiPickerModal({
         <DialogHeader>
           <DialogTitle className="text-center">이모티콘</DialogTitle>
         </DialogHeader>
-        <div className="grid grid-cols-6 gap-2 py-4">
+        <div className="grid grid-cols-3 gap-2 py-4">
           {emojis.map((emoji, index) => (
             <EmojiButton
               emoji={emoji}

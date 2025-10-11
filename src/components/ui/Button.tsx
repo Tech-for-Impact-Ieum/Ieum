@@ -65,7 +65,7 @@ export function EmojiButton({
     <button
       key={index}
       onClick={() => handleEmojiClick(emoji)}
-      className="flex h-12 w-12 items-center justify-center rounded-lg text-2xl transition-colors hover:bg-muted"
+      className="flex h-full w-full items-center justify-center rounded-lg text-8xl transition-colors hover:bg-muted"
     >
       {emoji}
     </button>

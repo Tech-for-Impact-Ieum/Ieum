@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/Modal'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { Mic } from 'lucide-react'
 
 interface VoiceInputModalProps {

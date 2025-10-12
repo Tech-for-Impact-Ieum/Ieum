@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Users, MessageCircle, Settings } from 'lucide-react'
-import { cn } from '../lib/utils'
+import { cn } from '../lib/ui-utils'
 
 function BottomNav() {
   const pathname = usePathname()

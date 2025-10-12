@@ -84,14 +84,16 @@ export const chatRooms: ChatRoom[] = [
 export const sampleMessages: Message[] = [
   {
     id: '1',
+    roomId : '1',
     text: '다음 주 소모임에 같이 가볼 생각이 있어요?',
     sender: 'other',
     time: '오후 2:30',
     username: '김정우',
   },
-  { id: '2', text: '네, 좋아요!', sender: 'me', time: '오후 2:31' },
+  { id: '2', roomId: '1', text: '네, 좋아요!', sender: 'me', time: '오후 2:31' },
   {
     id: '3',
+    roomId: '1',
     text: '그럼 토요일 2시에 만나요',
     sender: 'other',
     time: '오후 2:32',

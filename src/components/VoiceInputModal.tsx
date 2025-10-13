@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { Mic } from 'lucide-react'
@@ -13,6 +13,11 @@ interface VoiceInputModalProps {
 export function VoiceInputModal({ open, onOpenChange }: VoiceInputModalProps) {
   const [isRecording, setIsRecording] = useState(false)
   const [recordingTime, setRecordingTime] = useState(0)
+  const [transcript, setTranscript] = useState('')
+  const [isSending, setIsSending] = useState(false)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const mediaStreamRef = useRef<MediaStream | null>(null)
+  const recordedChunksRef = useRef<BlobPart[]>([])
 
   useEffect(() => {
     let interval: NodeJS.Timeout
@@ -28,10 +33,13 @@ export function VoiceInputModal({ open, onOpenChange }: VoiceInputModalProps) {
 
   useEffect(() => {
     if (open) {
-      setIsRecording(true)
+      // Reset previous session state
+      setTranscript('')
+      startRecording().catch((e) => {
+        console.error('Failed to start recording', e)
+      })
     } else {
-      setIsRecording(false)
-      setRecordingTime(0)
+      stopRecording()
     }
   }, [open])
 
@@ -43,12 +51,82 @@ export function VoiceInputModal({ open, onOpenChange }: VoiceInputModalProps) {
 
   const handleRetry = () => {
     setRecordingTime(0)
+    setTranscript('')
+    startRecording().catch((e) => console.error(e))
+  }
+
+  const handleSend = async () => {
+    try {
+      setIsSending(true)
+      const blob = await stopRecording()
+      if (!blob) return
+      const form = new FormData()
+      // Use .webm since MediaRecorder default in Chrome produces webm/opus
+      form.append(
+        'file',
+        new File([blob], 'audio.webm', { type: blob.type || 'audio/webm' }),
+      )
+      const res = await fetch('/api/transcribe', {
+        method: 'POST',
+        body: form,
+      })
+      const data = await res.json()
+      if (!res.ok || !data.ok) {
+        console.error('Transcription failed', data)
+        return
+      }
+      setTranscript(data.text || '')
+    } catch (e) {
+      console.error('Failed to send transcription', e)
+    } finally {
+      setIsSending(false)
+    }
+  }
+
+  async function startRecording() {
+    // Request mic access
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    mediaStreamRef.current = stream
+    recordedChunksRef.current = []
+
+    const recorder = new MediaRecorder(stream)
+    mediaRecorderRef.current = recorder
+    recorder.ondataavailable = (event) => {
+      if (event.data && event.data.size > 0) {
+        recordedChunksRef.current.push(event.data)
+      }
+    }
+    recorder.onstop = () => {
+      stream.getTracks().forEach((t) => t.stop())
+      mediaStreamRef.current = null
+    }
+    recorder.start()
     setIsRecording(true)
   }
 
-  const handleSend = () => {
+  async function stopRecording(): Promise<Blob | null> {
+    if (!mediaRecorderRef.current) {
+      setIsRecording(false)
+      return null
+    }
+    const recorder = mediaRecorderRef.current
+    if (recorder.state !== 'inactive') {
+      await new Promise<void>((resolve) => {
+        recorder.onstop = () => {
+          if (mediaStreamRef.current) {
+            mediaStreamRef.current.getTracks().forEach((t) => t.stop())
+            mediaStreamRef.current = null
+          }
+          resolve()
+        }
+        recorder.stop()
+      })
+    }
     setIsRecording(false)
-    onOpenChange(false)
+    const blob = new Blob(recordedChunksRef.current, { type: 'audio/webm' })
+    recordedChunksRef.current = []
+    setRecordingTime(0)
+    return blob
   }
 
   return (
@@ -68,6 +146,11 @@ export function VoiceInputModal({ open, onOpenChange }: VoiceInputModalProps) {
           <div className="text-2xl font-semibold tabular-nums">
             {formatTime(recordingTime)}
           </div>
+          {transcript && (
+            <div className="w-full rounded-md border p-3 text-sm text-muted-foreground">
+              {transcript}
+            </div>
+          )}
           <div className="flex gap-3">
             <Button
               variant="outline"
@@ -76,7 +159,11 @@ export function VoiceInputModal({ open, onOpenChange }: VoiceInputModalProps) {
             >
               다시하기
             </Button>
-            <Button onClick={handleSend} className="min-w-[100px]">
+            <Button
+              onClick={handleSend}
+              className="min-w-[100px]"
+              disabled={isSending}
+            >
               보내기
             </Button>
           </div>

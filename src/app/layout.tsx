@@ -20,7 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+      <body
+        className={`font-sans ${GeistSans.variable} ${GeistMono.variable} h-screen w-screen max-w-[430px] max-h-[844px] mx-auto`}
+      >
         <Suspense fallback={<div>Loading...</div>}>
           <div className="w-full h-full">{children}</div>
         </Suspense>

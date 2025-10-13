@@ -75,14 +75,17 @@ export function EmojiButton({
 export function QuickResponseButton({
   index,
   tag,
+  onClick,
 }: {
   index: number
   tag: string
+  onClick?: (tag: string) => void
 }) {
   return (
     <button
       key={index}
-      className="rounded-full border border-border bg-muted px-4 py-2 text-sm transition-colors hover:bg-muted/80"
+      className="rounded-full border border-border bg-muted px-4 py-2 text-sm transition-colors hover:bg-muted/80 cursor-pointer"
+      onClick={() => onClick?.(tag)}
     >
       {tag}
     </button>

@@ -40,7 +40,7 @@ export function ActionButtons({
       <Button
         variant="ghost"
         size="sm"
-        className="flex-1 gap-2 text-xs"
+        className="flex-1 gap-2 text-xs cursor-pointer"
         onClick={() => setShowEmojiModal(true)}
       >
         <Smile className="h-4 w-4" />
@@ -49,7 +49,7 @@ export function ActionButtons({
       <Button
         variant="ghost"
         size="sm"
-        className="flex-1 gap-2 text-xs"
+        className="flex-1 gap-2 text-xs cursor-pointer"
         onClick={() => setShowVoiceModal(true)}
       >
         <Mic className="h-4 w-4" />
@@ -58,7 +58,7 @@ export function ActionButtons({
       <Button
         variant="ghost"
         size="sm"
-        className="flex-1 gap-2 text-xs"
+        className="flex-1 gap-2 text-xs cursor-pointer"
         onClick={() => setShowQuickResponseModal(true)}
       >
         <ImageIcon className="h-4 w-4" />

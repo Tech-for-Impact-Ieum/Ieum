@@ -3,8 +3,7 @@ import { cn } from '../../lib/ui-utils'
 import { Button } from './Button'
 import { ImageIcon, Mic, Smile } from 'lucide-react'
 
-export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {}
+export type InputProps = React.InputHTMLAttributes<HTMLInputElement>
 
 function Input(
   { className, type, ...props }: InputProps,

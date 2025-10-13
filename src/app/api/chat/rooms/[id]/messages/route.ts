@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { sampleMessages } from '@/lib/dummy_data'
+import { Message } from '@/lib/interface'
 
 export async function GET(
   req: Request,
@@ -11,7 +12,10 @@ export async function GET(
     return NextResponse.json({ ok: true, roomId: id, messages })
   } catch (err) {
     console.error('GET /api/chat/rooms/[id]/messages error', err)
-    return NextResponse.json({ ok: false, error: 'Failed to fetch messages' }, { status: 500 })
+    return NextResponse.json(
+      { ok: false, error: 'Failed to fetch messages' },
+      { status: 500 },
+    )
   }
 }
 
@@ -25,10 +29,13 @@ export async function POST(
     const { content, username } = body
 
     if (!content) {
-      return NextResponse.json({ message: 'content는 필수입니다.' }, { status: 400 })
+      return NextResponse.json(
+        { message: 'content는 필수입니다.' },
+        { status: 400 },
+      )
     }
 
-    const newMessage = {
+    const newMessage: Message = {
       id: String(Date.now()),
       text: content,
       sender: username ? 'other' : 'me',
@@ -38,12 +45,15 @@ export async function POST(
     }
 
     // In-memory append (dev only)
-    sampleMessages.push(newMessage as any)
+    sampleMessages.push(newMessage)
 
     return NextResponse.json({ ok: true, message: newMessage }, { status: 201 })
   } catch (err) {
     console.error('POST /api/chat/rooms/[id]/messages error', err)
-    return NextResponse.json({ ok: false, error: 'Failed to send message' }, { status: 500 })
+    return NextResponse.json(
+      { ok: false, error: 'Failed to send message' },
+      { status: 500 },
+    )
   }
 }
 

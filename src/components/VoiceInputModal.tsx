@@ -8,9 +8,14 @@ import { Mic } from 'lucide-react'
 interface VoiceInputModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onSend: (text: string) => void
 }
 
-export function VoiceInputModal({ open, onOpenChange }: VoiceInputModalProps) {
+export function VoiceInputModal({
+  open,
+  onOpenChange,
+  onSend,
+}: VoiceInputModalProps) {
   const [isRecording, setIsRecording] = useState(false)
   const [recordingTime, setRecordingTime] = useState(0)
   const [transcript, setTranscript] = useState('')
@@ -55,7 +60,7 @@ export function VoiceInputModal({ open, onOpenChange }: VoiceInputModalProps) {
     startRecording().catch((e) => console.error(e))
   }
 
-  const handleSend = async () => {
+  const handleTranscribe = async () => {
     try {
       setIsSending(true)
       const blob = await stopRecording()
@@ -81,6 +86,10 @@ export function VoiceInputModal({ open, onOpenChange }: VoiceInputModalProps) {
     } finally {
       setIsSending(false)
     }
+  }
+
+  const handleSend = async () => {
+    onSend(transcript)
   }
 
   async function startRecording() {
@@ -157,10 +166,10 @@ export function VoiceInputModal({ open, onOpenChange }: VoiceInputModalProps) {
               onClick={handleRetry}
               className="min-w-[100px] bg-transparent"
             >
-              다시하기
+              다시 녹음 하기
             </Button>
             <Button
-              onClick={handleSend}
+              onClick={handleTranscribe}
               className="min-w-[100px]"
               disabled={isSending}
             >

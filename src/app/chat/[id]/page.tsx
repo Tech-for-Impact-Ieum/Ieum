@@ -49,6 +49,24 @@ export default function ChatRoomPage() {
     setInputMessage((prev) => prev + emoji)
   }
 
+  const handleQuickResponseSelect = (text: string) => {
+    console.log('handleQuickResponseSelect', text)
+    setMessages([
+      ...messages,
+      {
+        id: Date.now().toString(),
+        text: text,
+        sender: 'me',
+        time: new Date().toLocaleTimeString('ko-KR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      },
+    ])
+    setShowQuickResponseModal(false)
+    setInputMessage('')
+  }
+
   return (
     <>
       <div className="flex h-full flex-col">
@@ -109,6 +127,8 @@ export default function ChatRoomPage() {
       <QuickResponseModal
         open={showQuickResponseModal}
         onOpenChange={setShowQuickResponseModal}
+        messages={messages.map((m) => ({ sender: m.sender, text: m.text }))}
+        onSelect={handleQuickResponseSelect}
       />
     </>
   )

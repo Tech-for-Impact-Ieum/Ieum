@@ -49,6 +49,22 @@ export default function ChatRoomPage() {
     setInputMessage((prev) => prev + emoji)
   }
 
+  const handleVoiceInputSelect = (text: string) => {
+    setMessages([
+      ...messages,
+      {
+        id: Date.now().toString(),
+        text: text,
+        sender: 'me',
+        time: new Date().toLocaleTimeString('ko-KR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      },
+    ])
+    setShowVoiceModal(false)
+  }
+
   const handleQuickResponseSelect = (text: string) => {
     console.log('handleQuickResponseSelect', text)
     setMessages([
@@ -118,7 +134,11 @@ export default function ChatRoomPage() {
       </div>
 
       {/* Modals */}
-      <VoiceInputModal open={showVoiceModal} onOpenChange={setShowVoiceModal} />
+      <VoiceInputModal
+        open={showVoiceModal}
+        onOpenChange={setShowVoiceModal}
+        onSend={handleVoiceInputSelect}
+      />
       <EmojiPickerModal
         open={showEmojiModal}
         onOpenChange={setShowEmojiModal}

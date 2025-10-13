@@ -19,7 +19,7 @@ export function VoiceInputModal({
   const [isRecording, setIsRecording] = useState(false)
   const [recordingTime, setRecordingTime] = useState(0)
   const [transcript, setTranscript] = useState('')
-  const [isSending, setIsSending] = useState(false)
+  const [isTranscribing, setIsTranscribing] = useState(false)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const mediaStreamRef = useRef<MediaStream | null>(null)
   const recordedChunksRef = useRef<BlobPart[]>([])
@@ -40,9 +40,8 @@ export function VoiceInputModal({
     if (open) {
       // Reset previous session state
       setTranscript('')
-      startRecording().catch((e) => {
-        console.error('Failed to start recording', e)
-      })
+      setRecordingTime(0)
+      setIsRecording(false)
     } else {
       stopRecording()
     }
@@ -60,9 +59,13 @@ export function VoiceInputModal({
     startRecording().catch((e) => console.error(e))
   }
 
+  const handleStart = () => {
+    startRecording().catch((e) => console.error('Failed to start recording', e))
+  }
+
   const handleTranscribe = async () => {
     try {
-      setIsSending(true)
+      setIsTranscribing(true)
       const blob = await stopRecording()
       if (!blob) return
       const form = new FormData()
@@ -84,12 +87,13 @@ export function VoiceInputModal({
     } catch (e) {
       console.error('Failed to send transcription', e)
     } finally {
-      setIsSending(false)
+      setIsTranscribing(false)
     }
   }
 
-  const handleSend = async () => {
+  const handleSend = () => {
     onSend(transcript)
+    onOpenChange(false)
   }
 
   async function startRecording() {
@@ -155,26 +159,55 @@ export function VoiceInputModal({
           <div className="text-2xl font-semibold tabular-nums">
             {formatTime(recordingTime)}
           </div>
-          {transcript && (
+
+          {/* Transcript preview */}
+          {!isRecording && isTranscribing && !transcript && (
+            <div className="text-sm text-muted-foreground">처리 중…</div>
+          )}
+          {!isRecording && transcript && (
             <div className="w-full rounded-md border p-3 text-sm text-muted-foreground">
               {transcript}
             </div>
           )}
+
           <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={handleRetry}
-              className="min-w-[100px] bg-transparent"
-            >
-              다시 녹음 하기
-            </Button>
-            <Button
-              onClick={handleTranscribe}
-              className="min-w-[100px]"
-              disabled={isSending}
-            >
-              보내기
-            </Button>
+            {/* Initial state: show start button */}
+            {!isRecording && !transcript && (
+              <Button onClick={handleStart} className="min-w-[120px]">
+                녹음 시작
+              </Button>
+            )}
+
+            {/* Recording state: show finish button */}
+            {isRecording && (
+              <Button
+                onClick={handleTranscribe}
+                className="min-w-[120px]"
+                disabled={isTranscribing}
+              >
+                {isTranscribing ? '처리 중…' : '녹음 완료'}
+              </Button>
+            )}
+
+            {/* After transcription: show retry and send */}
+            {!isRecording && transcript && (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={handleRetry}
+                  className="min-w-[120px] bg-transparent"
+                >
+                  다시 녹음
+                </Button>
+                <Button
+                  onClick={handleSend}
+                  className="min-w-[120px]"
+                  disabled={!transcript}
+                >
+                  보내기
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </DialogContent>

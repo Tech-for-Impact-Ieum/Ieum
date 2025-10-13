@@ -32,9 +32,9 @@ export async function POST(req: Request) {
       .join('\n')
 
     const system =
-      'You are a concise assistant that suggests short, natural Korean quick replies (1 short sentence or phrase each). Return only a JSON array of 3-4 strings, no extra text.'
+      '너는 대화 내용을 보고 맥락에서 "안시현"이라는 참가자가 대화에 참여하기 위해 짧은 한국어 답변을 제안해줘야해. Return only a JSON array of 3-4 strings, no extra text.'
 
-    const user = `Recent chat:\n${chatText}\n\nGenerate 3-4 short, natural Korean quick replies that the user might send next. Output JSON array only.`
+    const user = `최근 대화:\n${chatText}\n\n대화 맥락에 참여하기 위한 3-4개의 짧은 한국어 답변을 제안해줘. Return only a JSON array of 3-4 strings, no extra text.`
 
     console.log(system)
     console.log(user)
@@ -46,7 +46,6 @@ export async function POST(req: Request) {
         { role: 'user', content: user },
       ],
       temperature: 0.7,
-      max_tokens: 120,
     })
 
     const content = response.choices?.[0]?.message?.content?.trim() || '[]'

@@ -21,7 +21,8 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body
-        className={`font-sans ${GeistSans.variable} ${GeistMono.variable} h-screen w-screen max-w-[430px] max-h-[844px] mx-auto`}
+        // Desktop에서 mobile처럼 보이고 싶으면 sm:max-w-[430px] sm:max-h-[844px] mx-auto 사용
+        className={`font-sans ${GeistSans.variable} ${GeistMono.variable} h-screen w-screen sm:max-w-[430px] sm:max-h-[844px] mx-auto`}
       >
         <Suspense fallback={<div>Loading...</div>}>
           <div className="w-full h-full">{children}</div>

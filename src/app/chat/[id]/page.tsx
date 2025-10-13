@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Send } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { ActionButtons, Input } from '@/components/ui/Input'
@@ -11,6 +11,7 @@ import { sampleMessages } from '@/lib/dummy_data'
 import { Message } from '@/lib/interface'
 import { ChatHeader } from '@/components/Header'
 import { ChatElement } from '@/components/Chat'
+import { ContextHelper } from '@/components/ContextHelper'
 
 export default function ChatRoomPage() {
   const [messages, setMessages] = useState<Message[]>(sampleMessages)
@@ -18,6 +19,7 @@ export default function ChatRoomPage() {
   const [showVoiceModal, setShowVoiceModal] = useState(false)
   const [showEmojiModal, setShowEmojiModal] = useState(false)
   const [showQuickResponseModal, setShowQuickResponseModal] = useState(false)
+  const bottomRef = useRef<HTMLDivElement>(null)
 
   // Composition state for IME input
   const [isComposing, setIsComposing] = useState(false)
@@ -83,6 +85,12 @@ export default function ChatRoomPage() {
     setInputMessage('')
   }
 
+  useEffect(() => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [messages])
+
   return (
     <>
       <div className="flex h-full flex-col">
@@ -94,11 +102,19 @@ export default function ChatRoomPage() {
             {messages.map((message) => (
               <ChatElement key={message.id} message={message} />
             ))}
+            <div ref={bottomRef} />
           </div>
         </div>
 
         {/* Input Area */}
         <div className="border-t border-border bg-card">
+          <ContextHelper
+            messages={messages.map((m) => ({
+              sender: m.sender,
+              username: m.username,
+              text: m.text,
+            }))}
+          />
           <ActionButtons
             setShowEmojiModal={setShowEmojiModal}
             setShowVoiceModal={setShowVoiceModal}

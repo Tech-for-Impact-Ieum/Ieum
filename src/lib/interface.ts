@@ -18,4 +18,5 @@ export interface Message {
   sender: 'me' | 'other'
   time: string
   username?: string
+  roomId?: string
 }

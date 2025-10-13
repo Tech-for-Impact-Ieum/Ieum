@@ -131,10 +131,6 @@
 /* mobile screen ratio */
 html,
 body {
-  width: 390px;
-  height: 844px;
-  margin: 0 auto;
-  /* overflow-x: hidden; */
   transform-origin: top center;
 }
 

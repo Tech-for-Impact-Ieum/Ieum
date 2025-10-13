@@ -2,10 +2,8 @@ import { NextResponse } from 'next/server'
 import { sampleMessages } from '@/lib/dummy_data'
 import { Message } from '@/lib/interface'
 
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } },
-) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function GET(req: Request, { params }: any) {
   try {
     const { id } = params
     const messages = sampleMessages.filter((m) => m.roomId === id)
@@ -19,10 +17,8 @@ export async function GET(
   }
 }
 
-export async function POST(
-  req: Request,
-  { params }: { params: { id: string } },
-) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function POST(req: Request, { params }: any) {
   try {
     const { id } = params
     const body = await req.json()

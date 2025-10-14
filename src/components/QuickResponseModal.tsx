@@ -69,10 +69,10 @@ export function QuickResponseModal({
         </DialogHeader>
         <div className="flex min-h-16 flex-wrap gap-2 py-4">
           {isLoading && (
-            <div className="text-sm text-muted-foreground">생성 중…</div>
+            <div className="text-lg text-muted-foreground">생성 중…</div>
           )}
           {!isLoading && suggestions.length === 0 && (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-lg text-muted-foreground">
               제안이 없습니다.
             </div>
           )}

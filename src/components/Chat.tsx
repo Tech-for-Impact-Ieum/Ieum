@@ -37,7 +37,7 @@ function TextElement({
           : 'rounded-bl-sm bg-[var(--chat-bubble-received)] text-foreground'
       }`}
     >
-      <p className="text-sm leading-relaxed">{message.text}</p>
+      <p className="text-lg leading-relaxed">{message.text}</p>
     </div>
   )
 }
@@ -50,7 +50,7 @@ function SenderElement({
   isMyMessage: boolean
 }) {
   if (isMyMessage || !sender) return null
-  return <span className="px-2 text-xs text-muted-foreground">{sender}</span>
+  return <span className="px-2 font-normal text-xl">{sender}</span>
 }
 
 // TODO: do not show time if sender & time are same as previous message

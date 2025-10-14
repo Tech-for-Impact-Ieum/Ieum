@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Radio } from 'lucide-react'
 import { friends } from '../../lib/dummy_data'
 import { MenuHeader } from '../../components/Header'
 import SearchBar from '../../components/SearchBar'
@@ -20,14 +19,9 @@ export default function FriendsPage() {
       <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
       {/* Friends List */}
-      <div className="flex-1 overflow-y-auto bg-white ">
+      <div className="flex-1 px-3 overflow-y-auto bg-white ">
         {filteredFriends.map((friend) => (
-          <Profile
-            key={friend.id}
-            id={friend.id}
-            name={friend.name}
-            status={friend.status}
-          />
+          <Profile key={friend.id} id={friend.id} name={friend.name} />
         ))}
       </div>
     </div>

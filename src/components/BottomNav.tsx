@@ -34,7 +34,7 @@ function BottomNav() {
               )}
             >
               <Icon className="h-5 w-5" />
-              <span className="font-medium">{item.label}</span>
+              <span className="font-medium text-2xl">{item.label}</span>
             </Link>
           )
         })}

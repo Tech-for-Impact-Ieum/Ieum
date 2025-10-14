@@ -51,7 +51,7 @@ export function ContextHelper({
         onClick={() => setOpen(true)}
       >
         <div className="flex justify-end items-end gap-2">
-          <span className="text-sm">? 대화 요약 보기</span>
+          <span className="text-lg">? 대화 요약 보기</span>
         </div>
       </div>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -59,7 +59,7 @@ export function ContextHelper({
           <DialogHeader>
             <DialogTitle className="text-center">대화 요약</DialogTitle>
           </DialogHeader>
-          <div className="min-h-24 whitespace-pre-wrap text-sm text-muted-foreground mt-8">
+          <div className="min-h-24 whitespace-pre-wrap text-lg text-muted-foreground mt-8">
             {loading ? '요약 중…' : summary || '요약이 없습니다.'}
           </div>
           <div className="flex justify-center pt-2">

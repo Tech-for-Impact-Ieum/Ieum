@@ -162,10 +162,10 @@ export function VoiceInputModal({
 
           {/* Transcript preview */}
           {!isRecording && isTranscribing && !transcript && (
-            <div className="text-sm text-muted-foreground">처리 중…</div>
+            <div className="text-lg text-muted-foreground">처리 중…</div>
           )}
           {!isRecording && transcript && (
-            <div className="w-full rounded-md border p-3 text-sm text-muted-foreground">
+            <div className="w-full rounded-md border p-3 text-lg text-muted-foreground">
               {transcript}
             </div>
           )}

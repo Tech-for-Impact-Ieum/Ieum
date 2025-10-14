@@ -84,7 +84,7 @@ export function QuickResponseButton({
   return (
     <button
       key={index}
-      className="rounded-full border border-border bg-muted px-4 py-2 text-sm transition-colors hover:bg-muted/80 cursor-pointer"
+      className="rounded-full border border-border bg-muted px-4 py-2 text-lg transition-colors hover:bg-muted/80 cursor-pointer"
       onClick={() => onClick?.(tag)}
     >
       {tag}

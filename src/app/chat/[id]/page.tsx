@@ -48,7 +48,19 @@ export default function ChatRoomPage() {
   }
 
   const handleEmojiSelect = (emoji: string) => {
-    setInputMessage((prev) => prev + emoji)
+    setMessages([
+      ...messages,
+      {
+        id: Date.now().toString(),
+        text: emoji,
+        sender: 'me',
+        time: new Date().toLocaleTimeString('ko-KR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      },
+    ])
+    setShowEmojiModal(false)
   }
 
   const handleVoiceInputSelect = (text: string) => {

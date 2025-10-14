@@ -1,11 +1,11 @@
 import { ChatRoom, Friend, Message } from './interface'
 
 export const friends: Friend[] = [
-  { id: '1', name: '이름', status: '온라인' },
-  { id: '2', name: '이름', status: '자리 비움' },
-  { id: '3', name: '이름', status: '온라인' },
-  { id: '4', name: '이름', status: '오프라인' },
-  { id: '5', name: '이름', status: '온라인' },
+  { id: '1', name: '이름' },
+  { id: '2', name: '이름' },
+  { id: '3', name: '이름' },
+  { id: '4', name: '이름' },
+  { id: '5', name: '이름' },
 ]
 
 export const chatRooms: ChatRoom[] = [

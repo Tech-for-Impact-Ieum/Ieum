@@ -154,8 +154,9 @@ export default function ChatRoomPage() {
               size="icon"
               onClick={handleSendMessage}
               disabled={!inputMessage.trim()}
+              className="rounded-full"
             >
-              <Send className="h-4 w-4" />
+              <Send size={24} />
             </Button>
           </div>
         </div>

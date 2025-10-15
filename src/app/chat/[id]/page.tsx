@@ -109,7 +109,7 @@ export default function ChatRoomPage() {
         <ChatHeader title="이음톡방" />
 
         {/* Messages List */}
-        <div className="flex-1 overflow-y-auto bg-muted/20 p-4">
+        <div className="flex-1 overflow-y-auto bg-kakao-skyblue p-4">
           <div className="mx-auto flex max-w-2xl flex-col gap-3">
             {messages.map((message) => (
               <ChatElement key={message.id} message={message} />
@@ -146,7 +146,7 @@ export default function ChatRoomPage() {
                   handleSendMessage()
                 }
               }}
-              className="flex-1"
+              className="pl-10 text-2xl bg-gray-100 py-5 rounded-xl"
               onCompositionStart={handleCompositionStart}
               onCompositionEnd={handleCompositionEnd}
             />
@@ -154,9 +154,9 @@ export default function ChatRoomPage() {
               size="icon"
               onClick={handleSendMessage}
               disabled={!inputMessage.trim()}
-              className="rounded-full"
+              className="rounded-xl w-28"
             >
-              <Send size={24} />
+              <div className="text-2xl">보내기</div>
             </Button>
           </div>
         </div>

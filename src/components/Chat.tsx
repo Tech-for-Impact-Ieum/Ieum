@@ -31,10 +31,10 @@ function TextElement({
 }) {
   return (
     <div
-      className={`rounded-2xl px-4 py-2 ${
+      className={`rounded-2xl px-4 py-2 text-foreground ${
         isMyMessage
-          ? 'rounded-br-sm bg-[var(--chat-bubble-sent)] text-white'
-          : 'rounded-bl-sm bg-[var(--chat-bubble-received)] text-foreground'
+          ? `rounded-br-sm bg-kakao-yellow `
+          : 'rounded-bl-sm bg-white'
       }`}
     >
       <p className="text-lg leading-relaxed">{message.text}</p>
@@ -50,7 +50,7 @@ function SenderElement({
   isMyMessage: boolean
 }) {
   if (isMyMessage || !sender) return null
-  return <span className="px-2 font-normal text-xl">{sender}</span>
+  return <span className="px-2 font-semibold text-xl">{sender}</span>
 }
 
 // TODO: do not show time if sender & time are same as previous message

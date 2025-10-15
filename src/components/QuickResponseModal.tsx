@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/Modal'
-import { Button, QuickResponseButton } from '@/components/ui/Button'
+import { QuickResponseButton } from '@/components/ui/Button'
 import { X } from 'lucide-react'
 
 interface QuickResponseModalProps {

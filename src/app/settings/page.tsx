@@ -16,7 +16,7 @@ export default function SettingsPage() {
       <MenuHeader title="설정" />
 
       {/* Settings List */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto bg-white">
         {settingsItems.map((item) => (
           <button
             key={item.id}

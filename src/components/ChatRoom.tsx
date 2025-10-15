@@ -18,7 +18,9 @@ export function ChatRoomElement({
     <Link
       key={id}
       href={`/chat/${id}`}
-      className="flex items-center gap-3 border-1 border-solid border-black transition-colors hover:bg-muted/50 px-4 py-4 mx-1 my-2 rounded-2xl hover:shadow-md transition-shadow cursor-pointer"
+      className={`flex items-center gap-3 border-1 border-solid border-black transition-colors hover:bg-muted/50 px-4 py-4 mx-1 my-2 rounded-2xl hover:shadow-md transition-shadow cursor-pointer ${
+        unread > 0 ? 'bg-kakao-yellow' : 'bg-white'
+      }`}
     >
       <Radio className="h-5 w-5 shrink-0 text-muted-foreground" />
       <div className="flex-1 overflow-hidden">
@@ -28,11 +30,11 @@ export function ChatRoomElement({
         </div>
         <p className="truncate text-lg text-muted-foreground">{lastMessage}</p>
       </div>
-      {unread > 0 && (
+      {/* {unread > 0 && (
         <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-destructive text-xs font-medium text-destructive-foreground">
           {unread}
         </div>
-      )}
+      )} */}
     </Link>
   )
 }

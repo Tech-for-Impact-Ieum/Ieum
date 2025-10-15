@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 export function MenuHeader({ title }: { title: string }) {
   return (
-    <header className="sticky flex justify-center top-0 z-40 border-b border-border bg-card px-4 py-4">
+    <header className="sticky flex justify-center bg-white top-0 z-40 px-4 py-4">
       <h1 className="text-3xl font-bold">{title}</h1>
     </header>
   )
@@ -12,7 +12,7 @@ export function MenuHeader({ title }: { title: string }) {
 
 export function ChatHeader({ title }: { title: string }) {
   return (
-    <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-border bg-card px-4 py-3">
+    <header className="bg-kakao-skyblue sticky top-0 z-40 flex items-center gap-3 px-4 py-3">
       <Link href="/">
         <Button variant="ghost" size="icon" className="h-8 w-8">
           <ArrowLeft className="h-5 w-5" />

@@ -1,4 +1,4 @@
-import { Radio } from 'lucide-react'
+import { UsersRound } from 'lucide-react'
 import Link from 'next/link'
 
 export function ChatRoomElement({
@@ -18,11 +18,11 @@ export function ChatRoomElement({
     <Link
       key={id}
       href={`/chat/${id}`}
-      className={`flex items-center gap-3 border-1 border-solid border-black transition-colors hover:bg-muted/50 px-4 py-4 mx-1 my-2 rounded-2xl hover:shadow-md transition-shadow cursor-pointer ${
+      className={`flex items-center gap-5 border-1 border-solid border-black transition-colors hover:kakao-yellow-dark px-4 py-4 mx-1 my-2 rounded-2xl hover:shadow-md transition-shadow cursor-pointer ${
         unread > 0 ? 'bg-kakao-yellow' : 'bg-white'
       }`}
     >
-      <Radio className="h-5 w-5 shrink-0 text-muted-foreground" />
+      <UsersRound size={28} className="shrink-0 text-muted-foreground" />
       <div className="flex-1 overflow-hidden">
         <div className="flex items-center justify-between gap-2">
           <h3 className="font-medium text-2xl">{name}</h3>

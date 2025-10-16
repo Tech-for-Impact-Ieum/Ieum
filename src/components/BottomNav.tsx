@@ -27,14 +27,14 @@ function BottomNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex flex-1 flex-col items-center gap-1 py-3 text-xs transition-colors',
+                'flex flex-1 flex-col items-center gap-1 py-3 text-xs transition-colors font-extrabold',
                 isActive
-                  ? 'text-foreground bg-muted/100 font-semibold'
+                  ? 'text-foreground bg-muted/100'
                   : 'text-muted-foreground hover:text-foreground',
               )}
             >
               <Icon className="h-5 w-5" />
-              <span className="font-medium text-2xl">{item.label}</span>
+              <span className="font-bold text-2xl">{item.label}</span>
             </Link>
           )
         })}

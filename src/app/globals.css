@@ -119,6 +119,8 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-kakao-yellow: #fae100;
   --color-kakao-skyblue: #bfcdde;
+  --color-kakao-yellow-dark: #fee500;
+  --color-kakao-gray: #ededed;
 }
 
 @layer base {

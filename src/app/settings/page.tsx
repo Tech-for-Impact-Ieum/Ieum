@@ -1,6 +1,6 @@
 'use client'
 
-import { Radio, ChevronRight } from 'lucide-react'
+import { ChevronRight, Settings } from 'lucide-react'
 import { MenuHeader } from '@/components/Header'
 
 export default function SettingsPage() {
@@ -12,7 +12,7 @@ export default function SettingsPage() {
   ]
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex h-full flex-col">
       <MenuHeader title="설정" />
 
       {/* Settings List */}
@@ -20,16 +20,19 @@ export default function SettingsPage() {
         {settingsItems.map((item) => (
           <button
             key={item.id}
-            className="flex w-full items-center gap-3 border-b border-border px-4 py-6 text-left transition-colors hover:bg-muted/50"
+            className="flex w-full items-center gap-6 border-b border-border px-6 py-6 text-left transition-colors hover:bg-muted/50"
           >
-            <Radio className="h-5 w-5 shrink-0 text-muted-foreground" />
+            <Settings size={32} className="shrink-0 text-muted-foreground" />
             <div className="flex-1">
               <h3 className="font-medium text-2xl">{item.label}</h3>
               {item.sublabel && (
                 <p className="text-lg text-muted-foreground">{item.sublabel}</p>
               )}
             </div>
-            <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
+            <ChevronRight
+              size={32}
+              className="shrink-0 text-muted-foreground"
+            />
           </button>
         ))}
       </div>

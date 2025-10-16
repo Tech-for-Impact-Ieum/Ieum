@@ -131,18 +131,18 @@ export const sampleMessages2: Message[] = [
   {
     id: '1',
     roomId: '6',
-    text: '안녕히 가세요!',
-    sender: 'other',
-    time: '오후 1:00',
-    username: '정다호',
-  },
-  {
-    id: '2',
-    roomId: '6',
     text: '좋은 주말 보내세요!',
     sender: 'me',
     time: '오후 1:05',
     username: '안시현',
+  },
+  {
+    id: '2',
+    roomId: '6',
+    text: '안녕히 가세요!',
+    sender: 'other',
+    time: '오후 1:00',
+    username: '정다호',
   },
 ]
 

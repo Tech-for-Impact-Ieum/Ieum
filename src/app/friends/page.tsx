@@ -14,12 +14,12 @@ export default function FriendsPage() {
   )
 
   return (
-    <div className="flex h-full flex-col ">
+    <div className="flex h-full flex-col">
       <MenuHeader title="친구" />
       <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
       {/* Friends List */}
-      <div className="flex-1 px-3 overflow-y-auto bg-white ">
+      <div className="flex-1 px-3 pb-20 overflow-y-auto bg-white ">
         {filteredFriends.map((friend) => (
           <Profile key={friend.id} id={friend.id} name={friend.name} />
         ))}

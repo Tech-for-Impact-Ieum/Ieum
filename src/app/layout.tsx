@@ -8,9 +8,9 @@ import { BottomNavWrapper } from '../components/BottomNav'
 import { Suspense } from 'react'
 
 export const metadata: Metadata = {
-  title: '채팅 앱',
-  description: 'Modern Korean chat application',
-  generator: 'v0.app',
+  title: '이음',
+  description: 'Tech for Impact 2025F',
+  generator: 'team 이음',
 }
 
 export default function RootLayout({

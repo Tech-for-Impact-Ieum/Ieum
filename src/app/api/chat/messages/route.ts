@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { sampleMessages } from '@/lib/dummy_data'
+import { chatRooms } from '@/lib/dummy_data'
 import { Message } from '@/lib/interface'
 
 export async function POST(req: Request) {
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     }
 
     // (dev only)
-    sampleMessages.push(newMessage)
+    chatRooms.find((room) => room.id === roomId)?.messages.push(newMessage)
 
     return NextResponse.json({ ok: true, message: newMessage }, { status: 201 })
   } catch (err) {

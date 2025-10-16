@@ -1,8 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Radio } from 'lucide-react'
-import Link from 'next/link'
 import { chatRooms } from '../lib/dummy_data'
 import { MenuHeader } from '../components/Header'
 import SearchBar from '../components/SearchBar'
@@ -27,7 +25,7 @@ export default function HomePage() {
             key={room.id}
             id={room.id}
             name={room.name}
-            lastMessage={room.lastMessage}
+            lastMessage={room.messages.at(-1)?.text || ''}
             time={room.time}
             unread={room.unread}
           />

@@ -1,20 +1,30 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { Send } from 'lucide-react'
+import { use, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { ActionButtons, Input } from '@/components/ui/Input'
 import { VoiceInputModal } from '@/components/VoiceInputModal'
 import { EmojiPickerModal } from '@/components/EmojiPickerModal'
 import { QuickResponseModal } from '@/components/QuickResponseModal'
-import { sampleMessages } from '@/lib/dummy_data'
+import { chatRooms, danceMessages } from '@/lib/dummy_data'
 import { Message } from '@/lib/interface'
 import { ChatHeader } from '@/components/Header'
 import { ChatElement } from '@/components/Chat'
 import { ContextHelper } from '@/components/ContextHelper'
+import React from 'react'
 
-export default function ChatRoomPage() {
-  const [messages, setMessages] = useState<Message[]>(sampleMessages)
+interface ChatPageProps {
+  params: Promise<{
+    id: string
+  }>
+}
+
+export default function ChatRoomPage({ params }: ChatPageProps) {
+  const { id } = use(params)
+  const chatTitle = chatRooms.find((room) => room.id === id)?.name || ''
+  const [messages, setMessages] = useState<Message[]>(
+    chatRooms.find((room) => room.id === id)?.messages || danceMessages,
+  )
   const [inputMessage, setInputMessage] = useState('')
   const [showVoiceModal, setShowVoiceModal] = useState(false)
   const [showEmojiModal, setShowEmojiModal] = useState(false)
@@ -106,7 +116,7 @@ export default function ChatRoomPage() {
   return (
     <>
       <div className="flex h-full flex-col">
-        <ChatHeader title="이음톡방" />
+        <ChatHeader title={chatTitle} />
 
         {/* Messages List */}
         <div className="flex-1 overflow-y-auto bg-kakao-skyblue p-4">

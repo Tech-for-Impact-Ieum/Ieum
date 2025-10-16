@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
-import { sampleMessages } from '@/lib/dummy_data'
+import { chatRooms } from '@/lib/dummy_data'
 import { Message } from '@/lib/interface'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function GET(req: Request, { params }: any) {
   try {
     const { id } = params
-    const messages = sampleMessages.filter((m) => m.roomId === id)
+    const messages = chatRooms.find((room) => room.id === id)?.messages || []
     return NextResponse.json({ ok: true, roomId: id, messages })
   } catch (err) {
     console.error('GET /api/chat/rooms/[id]/messages error', err)
@@ -23,6 +23,7 @@ export async function POST(req: Request, { params }: any) {
     const { id } = params
     const body = await req.json()
     const { content, username } = body
+    const messages = chatRooms.find((room) => room.id === id)?.messages || []
 
     if (!content) {
       return NextResponse.json(
@@ -41,7 +42,7 @@ export async function POST(req: Request, { params }: any) {
     }
 
     // In-memory append (dev only)
-    sampleMessages.push(newMessage)
+    messages.push(newMessage)
 
     return NextResponse.json({ ok: true, message: newMessage }, { status: 201 })
   } catch (err) {

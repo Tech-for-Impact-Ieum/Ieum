@@ -53,7 +53,7 @@ export const danceMessages: Message[] = [
   {
     id: '6',
     roomId: '1',
-    text: '저희 점심으로 **수제왕돈까스** (사부작의 옹호가게 중 하나) 같이 먹고 갈까요?',
+    text: '저희 점심으로 수제왕돈까스 (사부작의 옹호가게 중 하나) 같이 먹고 갈까요?',
     sender: 'me',
     time: '오후 1:05',
   },

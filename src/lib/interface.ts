@@ -8,6 +8,7 @@ export interface ChatRoom {
   id: number
   name: string
   messages: Message[]
+  participants: User[]
   unread: number
   time: string
 }

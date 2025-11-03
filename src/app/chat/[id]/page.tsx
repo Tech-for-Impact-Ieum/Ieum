@@ -6,8 +6,7 @@ import { ActionButtons, Input } from '@/components/ui/Input'
 import { VoiceInputModal } from '@/components/VoiceInputModal'
 import { EmojiPickerModal } from '@/components/EmojiPickerModal'
 import { QuickResponseModal } from '@/components/QuickResponseModal'
-import { chatRooms, danceMessages } from '@/lib/dummy_data'
-import { Message, User } from '@/lib/interface'
+import { ChatRoom, Message, User } from '@/lib/interface'
 import { ChatHeader } from '@/components/Header'
 import { ChatElement } from '@/components/Chat'
 import { ContextHelper } from '@/components/ContextHelper'
@@ -27,8 +26,8 @@ interface ChatPageProps {
 
 export default function ChatRoomPage({ params }: ChatPageProps) {
   const { id } = use(params)
-  const chatTitle = chatRooms.find((room) => room.id === id)?.name || ''
   const [messages, setMessages] = useState<Message[]>([])
+  const [chatRoom, setChatRoom] = useState<ChatRoom | null>(null)
   const [users, setUsers] = useState<User[]>([])
   const [currentUserId, setCurrentUserId] = useState<number | null>(null)
   const [inputMessage, setInputMessage] = useState('')
@@ -73,7 +72,28 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
         console.error('Error loading users:', error)
       }
     }
+    const loadChatRoom = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/chat/rooms/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          },
+        )
+        if (response.ok) {
+          const data = await response.json()
+          if (data.ok && data.room) {
+            setChatRoom(data.room)
+          }
+        }
+      } catch (error) {
+        console.error('Error loading chat room:', error)
+      }
+    }
 
+    loadChatRoom()
     loadUsers()
   }, [])
 
@@ -107,7 +127,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
 
   // Initialize socket connection and join room
   useEffect(() => {
-    if (!currentUserId) return
+    if (!currentUserId || !chatRoom?.id) return
 
     const token = localStorage.getItem('token')
     if (!token) {
@@ -115,19 +135,22 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
       return
     }
 
+    console.log('🔌 Setting up socket connection and room subscription...')
+
     // Initialize socket client with token
     const socket = initSocketClient(token)
 
-    // Join the chat room
-    joinRoom(id)
-    console.log(`Joined chat room: ${id}`)
+    // Join the chat room (will wait for connection if needed)
+    const roomId = chatRoom.id.toString()
+    joinRoom(roomId)
 
     // Listen for new messages from other users
     const unsubscribe = onNewMessage((message: Message) => {
-      console.log('Received new message:', message)
+      console.log('✓ Received new message:', message)
       setMessages((prev) => {
         // Avoid duplicate messages
         if (prev.some((msg) => msg.id === message.id)) {
+          console.log('  → Duplicate message, ignoring')
           return prev
         }
         // Determine if message is from current user
@@ -138,17 +161,18 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
               ? 'me'
               : 'other',
         } as Message
+        console.log('  → Added message to state:', enrichedMessage)
         return [...prev, enrichedMessage]
       })
     })
 
     // Cleanup on unmount
     return () => {
+      console.log('🧹 Cleaning up socket subscriptions...')
       unsubscribe()
-      leaveRoom(id)
-      console.log(`Left chat room: ${id}`)
+      leaveRoom(roomId)
     }
-  }, [id, currentUserId])
+  }, [id, currentUserId, chatRoom?.id])
 
   const handleSendMessage = async () => {
     console.log('inputMessage', inputMessage)
@@ -194,7 +218,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
       const data = await response.json()
 
       if (data.ok) {
-        // Message will be received via socket, no need to add manually
+        setMessages((prev) => [...prev, data.message as Message])
         console.log('Message sent successfully')
       }
     } catch (error) {
@@ -229,31 +253,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
   return (
     <>
       <div className="flex h-full flex-col">
-        <ChatHeader title={chatTitle} />
-
-        {/* User Selector for Testing */}
-        <div className="bg-yellow-100 border-b border-yellow-300 p-3">
-          <div className="flex items-center gap-3 max-w-2xl mx-auto">
-            <label className="font-semibold text-sm text-gray-700">
-              🧪 Test Mode - Select User:
-            </label>
-            <select
-              value={currentUserId?.toString() || ''}
-              onChange={(e) => setCurrentUserId(Number(e.target.value))}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {users.map((user: User) => (
-                <option key={user.id.toString()} value={user.id.toString()}>
-                  {user.name} (ID: {user.id.toString().slice(-6)})
-                </option>
-              ))}
-            </select>
-            <span className="text-xs text-gray-600">
-              Current:{' '}
-              {users.find((u: User) => u.id === currentUserId)?.name || 'None'}
-            </span>
-          </div>
-        </div>
+        {chatRoom && <ChatHeader title={chatRoom.name} />}
 
         {/* Messages List */}
         <div className="flex-1 overflow-y-auto bg-kakao-skyblue p-4">

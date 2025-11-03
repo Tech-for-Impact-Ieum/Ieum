@@ -6,6 +6,7 @@ let socket: Socket | null = null
 
 export function initSocketClient(token?: string) {
   if (socket?.connected) {
+    console.log('✓ Socket already connected, reusing:', socket?.id)
     return socket
   }
 
@@ -15,6 +16,7 @@ export function initSocketClient(token?: string) {
   }
 
   const url = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4001'
+  console.log('🔌 Initializing socket connection to:', url)
 
   socket = io(url, {
     path: '/socket.io/',
@@ -41,6 +43,11 @@ export function initSocketClient(token?: string) {
     console.error('✗ Socket error:', error)
   })
 
+  // Add general event listener to debug all incoming events
+  socket.onAny((eventName, ...args) => {
+    console.log(`📨 Socket event received: "${eventName}"`, args)
+  })
+
   return socket
 }
 
@@ -56,9 +63,21 @@ export function disconnectSocket() {
 }
 
 export function joinRoom(roomId: string) {
+  if (!socket) {
+    console.error(`❌ Cannot join room - socket not initialized`)
+    return
+  }
+
   if (socket && socket.connected) {
     socket.emit('join-room', roomId)
-    console.log(`Joined room: ${roomId}`)
+    console.log(`📍 Emitting join-room for: ${roomId}`)
+  } else {
+    console.warn(`⏳ Socket not yet connected, waiting...`)
+    // Wait for connection then join
+    socket.once('connect', () => {
+      socket?.emit('join-room', roomId)
+      console.log(`📍 Emitting join-room for: ${roomId} (after connect)`)
+    })
   }
 }
 
@@ -70,13 +89,18 @@ export function leaveRoom(roomId: string) {
 }
 
 export function onNewMessage(callback: (message: any) => void) {
+  console.log('👂 Setting up listener for "new-message" event')
   if (socket) {
     socket.on('new-message', callback)
+    console.log('✓ Listener registered for "new-message"')
+  } else {
+    console.error('❌ Cannot register listener - socket not initialized')
   }
 
   return () => {
     if (socket) {
       socket.off('new-message', callback)
+      console.log('🔇 Unregistered "new-message" listener')
     }
   }
 }

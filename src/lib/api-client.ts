@@ -85,6 +85,20 @@ export class ApiClient {
     const data = await response.json()
 
     if (!response.ok) {
+      // Handle authentication errors
+      if (response.status === 401 || response.status === 403) {
+        // Clear auth data
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+
+          // Redirect to login page if not already there
+          if (!window.location.pathname.includes('/login')) {
+            window.location.href = '/login'
+          }
+        }
+      }
+
       throw new Error(data.error || 'Request failed')
     }
 

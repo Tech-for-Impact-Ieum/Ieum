@@ -1,11 +1,11 @@
 // TODO: add profile image
 export interface Friend {
-  id: string
+  id: number
   name: string
 }
 
 export interface ChatRoom {
-  id: string
+  id: number
   name: string
   messages: Message[]
   unread: number
@@ -13,7 +13,7 @@ export interface ChatRoom {
 }
 
 export interface Message {
-  id: string
+  id: number
   text: string
   sender: 'me' | 'other'
   time: string
@@ -27,6 +27,9 @@ export interface User {
   id: number
   name: string
   email?: string
+  phoneNumber?: string
   profileImage?: string
   isOnline: boolean
+  lastSeenAt?: string
+  friendshipStatus?: 'none' | 'pending' | 'accepted' | 'blocked'
 }

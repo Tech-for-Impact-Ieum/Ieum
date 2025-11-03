@@ -4,29 +4,41 @@ import { io, Socket } from 'socket.io-client'
 
 let socket: Socket | null = null
 
-export function initSocketClient(userId?: string) {
+export function initSocketClient(token?: string) {
   if (socket?.connected) {
     return socket
   }
 
-  const defaultPort = Number(process.env.NEXT_PUBLIC_SOCKET_PORT || 3001)
-  const url = process.env.NEXT_PUBLIC_SOCKET_URL || `${typeof window !== 'undefined' ? window.location.protocol + '//' + window.location.hostname : 'http://localhost'}:${defaultPort}`
+  // Get token from localStorage if not provided
+  if (!token && typeof window !== 'undefined') {
+    token = localStorage.getItem('token') || undefined
+  }
+
+  const url = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4001'
 
   socket = io(url, {
     path: '/socket.io/',
+    auth: {
+      token: token,
+    },
     transports: ['websocket', 'polling'],
+    autoConnect: true,
   })
 
   socket.on('connect', () => {
-    console.log('Socket connected:', socket?.id)
+    console.log('✓ Socket connected:', socket?.id)
   })
 
-  socket.on('disconnect', () => {
-    console.log('Socket disconnected')
+  socket.on('disconnect', (reason) => {
+    console.log('⊖ Socket disconnected:', reason)
   })
 
   socket.on('connect_error', (error) => {
-    console.error('Socket connection error:', error)
+    console.error('✗ Socket connection error:', error.message)
+  })
+
+  socket.on('error', (error) => {
+    console.error('✗ Socket error:', error)
   })
 
   return socket
@@ -61,7 +73,7 @@ export function onNewMessage(callback: (message: any) => void) {
   if (socket) {
     socket.on('new-message', callback)
   }
-  
+
   return () => {
     if (socket) {
       socket.off('new-message', callback)
@@ -73,7 +85,7 @@ export function onRoomUpdate(callback: (room: any) => void) {
   if (socket) {
     socket.on('room-updated', callback)
   }
-  
+
   return () => {
     if (socket) {
       socket.off('room-updated', callback)
@@ -81,3 +93,48 @@ export function onRoomUpdate(callback: (room: any) => void) {
   }
 }
 
+export function onUserStatusChanged(callback: (data: any) => void) {
+  if (socket) {
+    socket.on('user-status-changed', callback)
+  }
+
+  return () => {
+    if (socket) {
+      socket.off('user-status-changed', callback)
+    }
+  }
+}
+
+export function onUserJoined(callback: (data: any) => void) {
+  if (socket) {
+    socket.on('user-joined', callback)
+  }
+
+  return () => {
+    if (socket) {
+      socket.off('user-joined', callback)
+    }
+  }
+}
+
+export function onUserLeft(callback: (data: any) => void) {
+  if (socket) {
+    socket.on('user-left', callback)
+  }
+
+  return () => {
+    if (socket) {
+      socket.off('user-left', callback)
+    }
+  }
+}
+
+export function sendMessage(
+  roomId: string,
+  content: string,
+  type: string = 'text',
+) {
+  if (socket && socket.connected) {
+    socket.emit('send-message', { roomId, content, type })
+  }
+}

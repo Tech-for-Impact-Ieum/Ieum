@@ -12,7 +12,6 @@ export interface ChatRoom {
   time: string
 }
 
-// NOTE: roomId needed?
 export interface Message {
   id: string
   text: string
@@ -20,4 +19,6 @@ export interface Message {
   time: string
   username?: string
   roomId?: string
+  senderId?: string
+  type?: string
 }

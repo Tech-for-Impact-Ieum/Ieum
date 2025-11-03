@@ -16,7 +16,7 @@ import {
   joinRoom,
   leaveRoom,
   onNewMessage,
-} from '@/lib/socket/socket-client'
+} from '@/lib/socket-client'
 import React from 'react'
 
 interface ChatPageProps {

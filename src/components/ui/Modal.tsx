@@ -146,3 +146,18 @@ export {
   DialogTitleWithRef as DialogTitle,
   DialogDescriptionWithRef as DialogDescription,
 }
+
+// Modal wrapper for easier usage
+interface ModalProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  children: React.ReactNode
+}
+
+export function Modal({ open, onOpenChange, children }: ModalProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContentWithRef>{children}</DialogContentWithRef>
+    </Dialog>
+  )
+}

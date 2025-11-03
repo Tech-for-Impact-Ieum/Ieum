@@ -12,7 +12,7 @@ export const danceMessages: Message[] = [
   {
     id: '1',
     roomId: '1',
-    text: '내일 오후 1시에 **사부작 춤 동아리** 하는 거 기억하고 계시죠? (AI quick message)',
+    text: '내일 오후 1시에 사부작 춤 동아리 하는 거 기억하고 계시죠?',
     sender: 'other',
     time: '오후 1:00',
     username: '김정우',
@@ -63,7 +63,7 @@ export const danceMessages: Message[] = [
     text: '수제왕돈까스 좋아요! 만나서 먹고 출발해요~~',
     sender: 'other',
     time: '오후 1:05',
-    username: '안시현',
+    username: '정다호',
   },
 ]
 
@@ -131,18 +131,18 @@ export const sampleMessages2: Message[] = [
   {
     id: '1',
     roomId: '6',
-    text: '안녕히 가세요!',
-    sender: 'other',
-    time: '오후 1:00',
+    text: '좋은 주말 보내세요!',
+    sender: 'me',
+    time: '오후 1:05',
     username: '안시현',
   },
   {
     id: '2',
     roomId: '6',
-    text: '좋은 주말 보내세요!',
-    sender: 'me',
-    time: '오후 1:05',
-    username: '김정우',
+    text: '안녕히 가세요!',
+    sender: 'other',
+    time: '오후 1:00',
+    username: '정다호',
   },
 ]
 
@@ -203,7 +203,7 @@ export const chatRooms: ChatRoom[] = [
   },
   {
     id: '6',
-    name: '김정우',
+    name: '정다호',
     messages: sampleMessages2,
     unread: 3,
     time: '월요일',

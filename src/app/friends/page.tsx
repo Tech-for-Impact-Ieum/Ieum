@@ -7,14 +7,7 @@ import { Profile } from '@/components/Profile'
 import { ApiClient } from '@/lib/api-client'
 import { Auth } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
-
-interface User {
-  id: number
-  name: string
-  email?: string
-  profileImage?: string
-  isOnline: boolean
-}
+import { User } from '@/lib/interface'
 
 export default function FriendsPage() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -69,8 +62,12 @@ export default function FriendsPage() {
         {filteredFriends.length === 0 ? (
           <p className="text-center text-gray-500 mt-4">친구가 없습니다</p>
         ) : (
-          filteredFriends.map((user) => (
-            <Profile key={user.id} id={user.id} name={user.name} />
+          filteredFriends.map((user: User) => (
+            <Profile
+              key={user.id.toString()}
+              id={user.id.toString()}
+              name={user.name}
+            />
           ))
         )}
       </div>

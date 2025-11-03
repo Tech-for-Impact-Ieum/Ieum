@@ -22,3 +22,11 @@ export interface Message {
   senderId?: string
   type?: string
 }
+
+export interface User {
+  id: number
+  name: string
+  email?: string
+  profileImage?: string
+  isOnline: boolean
+}

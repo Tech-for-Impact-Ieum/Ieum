@@ -7,7 +7,7 @@ import { VoiceInputModal } from '@/components/VoiceInputModal'
 import { EmojiPickerModal } from '@/components/EmojiPickerModal'
 import { QuickResponseModal } from '@/components/QuickResponseModal'
 import { chatRooms, danceMessages } from '@/lib/dummy_data'
-import { Message } from '@/lib/interface'
+import { Message, User } from '@/lib/interface'
 import { ChatHeader } from '@/components/Header'
 import { ChatElement } from '@/components/Chat'
 import { ContextHelper } from '@/components/ContextHelper'
@@ -18,11 +18,6 @@ import {
   onNewMessage,
 } from '@/lib/socket/socket-client'
 import React from 'react'
-
-interface User {
-  id: string
-  name: string
-}
 
 interface ChatPageProps {
   params: Promise<{
@@ -35,7 +30,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
   const chatTitle = chatRooms.find((room) => room.id === id)?.name || ''
   const [messages, setMessages] = useState<Message[]>([])
   const [users, setUsers] = useState<User[]>([])
-  const [currentUserId, setCurrentUserId] = useState<string>('')
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null)
   const [inputMessage, setInputMessage] = useState('')
   const [showVoiceModal, setShowVoiceModal] = useState(false)
   const [showEmojiModal, setShowEmojiModal] = useState(false)
@@ -139,7 +134,9 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
         const enrichedMessage = {
           ...message,
           sender:
-            message.senderId?.toString() === currentUserId ? 'me' : 'other',
+            message.senderId?.toString() === currentUserId?.toString()
+              ? 'me'
+              : 'other',
         } as Message
         return [...prev, enrichedMessage]
       })
@@ -241,19 +238,19 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
               🧪 Test Mode - Select User:
             </label>
             <select
-              value={currentUserId}
-              onChange={(e) => setCurrentUserId(e.target.value)}
+              value={currentUserId?.toString() || ''}
+              onChange={(e) => setCurrentUserId(Number(e.target.value))}
               className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              {users.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.name} (ID: {user.id.slice(-6)})
+              {users.map((user: User) => (
+                <option key={user.id.toString()} value={user.id.toString()}>
+                  {user.name} (ID: {user.id.toString().slice(-6)})
                 </option>
               ))}
             </select>
             <span className="text-xs text-gray-600">
               Current:{' '}
-              {users.find((u) => u.id === currentUserId)?.name || 'None'}
+              {users.find((u: User) => u.id === currentUserId)?.name || 'None'}
             </span>
           </div>
         </div>
@@ -261,7 +258,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
         {/* Messages List */}
         <div className="flex-1 overflow-y-auto bg-kakao-skyblue p-4">
           <div className="mx-auto flex max-w-2xl flex-col gap-3">
-            {messages.map((message) => (
+            {messages.map((message: Message) => (
               <ChatElement key={message.id} message={message} />
             ))}
             <div ref={bottomRef} />
@@ -271,7 +268,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
         {/* Input Area */}
         <div className="border-t border-border bg-card">
           <ContextHelper
-            messages={messages.map((m) => ({
+            messages={messages.map((m: Message) => ({
               sender: m.sender,
               username: m.username,
               text: m.text,
@@ -328,7 +325,10 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
       <QuickResponseModal
         open={showQuickResponseModal}
         onOpenChange={setShowQuickResponseModal}
-        messages={messages.map((m) => ({ sender: m.sender, text: m.text }))}
+        messages={messages.map((m: Message) => ({
+          sender: m.sender,
+          text: m.text,
+        }))}
         onSelect={handleQuickResponseSelect}
       />
     </>

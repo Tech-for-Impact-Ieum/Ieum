@@ -228,12 +228,13 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
   }
 
   const handleEmojiSelect = async (emoji: string) => {
-    await sendMessageToAPI(emoji, 'emoji')
+    // setInputMessage(emoji)
+    await sendMessageToAPI(emoji, 'text')
     setShowEmojiModal(false)
   }
 
   const handleVoiceInputSelect = async (text: string) => {
-    await sendMessageToAPI(text, 'voice')
+    await sendMessageToAPI(text, 'audio')
     setShowVoiceModal(false)
   }
 

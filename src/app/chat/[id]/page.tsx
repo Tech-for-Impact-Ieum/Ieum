@@ -341,8 +341,13 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
         open={showQuickResponseModal}
         onOpenChange={setShowQuickResponseModal}
         messages={messages.map((m: Message) => ({
+<<<<<<< HEAD
           senderName: m.senderName,
           text: m.text || '',
+=======
+          sender: m.sender,
+          text: m.text,
+>>>>>>> develop
         }))}
         onSelect={handleQuickResponseSelect}
       />

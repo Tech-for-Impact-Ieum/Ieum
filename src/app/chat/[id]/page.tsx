@@ -16,6 +16,7 @@ import {
   leaveRoom,
   onNewMessage,
 } from '@/lib/socket-client'
+import { Auth } from '@/lib/auth'
 import React from 'react'
 
 interface ChatPageProps {
@@ -202,7 +203,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     try {
       const token = localStorage.getItem('token')
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/chat/messages`,
+        `${process.env.NEXT_PUBLIC_API_URL}/chat/rooms/${id}/messages`,
         {
           method: 'POST',
           headers: {
@@ -210,7 +211,6 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            roomId: parseInt(id, 10), // Convert to number
             text,
             media, // Support for media array
           }),
@@ -285,9 +285,8 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
         <div className="border-t border-border bg-card">
           <ContextHelper
             messages={messages.map((m: Message) => ({
-              sender: m.sender,
-              username: m.username,
-              text: m.text,
+              senderName: m.senderName,
+              text: m.text || '',
             }))}
           />
           <ActionButtons
@@ -342,8 +341,8 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
         open={showQuickResponseModal}
         onOpenChange={setShowQuickResponseModal}
         messages={messages.map((m: Message) => ({
-          sender: m.sender,
-          text: m.text,
+          senderName: m.senderName,
+          text: m.text || '',
         }))}
         onSelect={handleQuickResponseSelect}
       />

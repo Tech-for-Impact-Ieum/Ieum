@@ -10,7 +10,7 @@ import {
 export function ContextHelper({
   messages,
 }: {
-  messages: { sender: 'me' | 'other'; username?: string; text: string }[]
+  messages: { senderName: string; text: string }[]
 }) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)

@@ -67,10 +67,6 @@ export interface Message {
   updatedAt?: string
   isDeleted?: boolean
   deletedAt?: string
-  // Legacy fields for compatibility
-  sender?: 'me' | 'other'
-  time?: string
-  username?: string
 }
 
 // ============================================

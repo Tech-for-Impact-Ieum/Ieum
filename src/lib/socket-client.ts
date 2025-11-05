@@ -62,29 +62,37 @@ export function disconnectSocket() {
   }
 }
 
-export function joinRoom(roomId: string) {
+export function joinRoom(roomId: number | string) {
   if (!socket) {
     console.error(`❌ Cannot join room - socket not initialized`)
     return
   }
 
+  // Convert to number if string (for compatibility)
+  const numericRoomId =
+    typeof roomId === 'string' ? parseInt(roomId, 10) : roomId
+
   if (socket && socket.connected) {
-    socket.emit('join-room', roomId)
-    console.log(`📍 Emitting join-room for: ${roomId}`)
+    socket.emit('join-room', numericRoomId)
+    console.log(`📍 Emitting join-room for: ${numericRoomId}`)
   } else {
     console.warn(`⏳ Socket not yet connected, waiting...`)
     // Wait for connection then join
     socket.once('connect', () => {
-      socket?.emit('join-room', roomId)
-      console.log(`📍 Emitting join-room for: ${roomId} (after connect)`)
+      socket?.emit('join-room', numericRoomId)
+      console.log(`📍 Emitting join-room for: ${numericRoomId} (after connect)`)
     })
   }
 }
 
-export function leaveRoom(roomId: string) {
+export function leaveRoom(roomId: number | string) {
   if (socket && socket.connected) {
-    socket.emit('leave-room', roomId)
-    console.log(`Left room: ${roomId}`)
+    // Convert to number if string (for compatibility)
+    const numericRoomId =
+      typeof roomId === 'string' ? parseInt(roomId, 10) : roomId
+
+    socket.emit('leave-room', numericRoomId)
+    console.log(`Left room: ${numericRoomId}`)
   }
 }
 
@@ -153,12 +161,83 @@ export function onUserLeft(callback: (data: any) => void) {
   }
 }
 
-export function sendMessage(
-  roomId: string,
-  content: string,
-  type: string = 'text',
-) {
+/**
+ * Send a message to a chat room
+ * @param roomId Room ID (number)
+ * @param text Text content (optional if media is present)
+ * @param media Array of media items (optional)
+ */
+export function sendMessage(roomId: number, text?: string, media: any[] = []) {
   if (socket && socket.connected) {
-    socket.emit('send-message', { roomId, content, type })
+    socket.emit('send-message', { roomId, text, media })
+  } else {
+    console.error('❌ Cannot send message - socket not connected')
+  }
+}
+
+/**
+ * Mark messages as read in a room
+ * @param roomId Room ID
+ * @param messageId Last read message ID (MongoDB ObjectId)
+ */
+export function markMessagesAsRead(roomId: number, messageId: string) {
+  if (socket && socket.connected) {
+    socket.emit('mark-read', { roomId, messageId })
+  }
+}
+
+/**
+ * Send typing indicator
+ * @param roomId Room ID
+ * @param isTyping Whether the user is typing
+ */
+export function sendTypingIndicator(roomId: number, isTyping: boolean) {
+  if (socket && socket.connected) {
+    socket.emit('typing', { roomId, isTyping })
+  }
+}
+
+/**
+ * Listen for unread count updates
+ */
+export function onUnreadCountUpdate(callback: (data: any) => void) {
+  if (socket) {
+    socket.on('unread-count-update', callback)
+  }
+
+  return () => {
+    if (socket) {
+      socket.off('unread-count-update', callback)
+    }
+  }
+}
+
+/**
+ * Listen for messages read events
+ */
+export function onMessagesRead(callback: (data: any) => void) {
+  if (socket) {
+    socket.on('messages-read', callback)
+  }
+
+  return () => {
+    if (socket) {
+      socket.off('messages-read', callback)
+    }
+  }
+}
+
+/**
+ * Listen for typing indicator
+ */
+export function onUserTyping(callback: (data: any) => void) {
+  if (socket) {
+    socket.on('user-typing', callback)
+  }
+
+  return () => {
+    if (socket) {
+      socket.off('user-typing', callback)
+    }
   }
 }

@@ -16,6 +16,7 @@ import {
   leaveRoom,
   onNewMessage,
 } from '@/lib/socket-client'
+import { Auth } from '@/lib/auth'
 import React from 'react'
 
 interface ChatPageProps {
@@ -141,8 +142,10 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     const socket = initSocketClient(token)
 
     // Join the chat room (will wait for connection if needed)
-    const roomId = chatRoom.id.toString()
-    joinRoom(roomId)
+    // Convert roomId to number for socket
+    const numericRoomId =
+      typeof chatRoom.id === 'string' ? parseInt(chatRoom.id, 10) : chatRoom.id
+    joinRoom(numericRoomId)
 
     // Listen for new messages from other users
     const unsubscribe = onNewMessage((message: Message) => {
@@ -170,7 +173,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     return () => {
       console.log('🧹 Cleaning up socket subscriptions...')
       unsubscribe()
-      leaveRoom(roomId)
+      leaveRoom(numericRoomId)
     }
   }, [id, currentUserId, chatRoom?.id])
 
@@ -179,7 +182,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     if (inputMessage.trim() && !isComposing && !isLoading) {
       setIsLoading(true)
       try {
-        await sendMessageToAPI(inputMessage, 'text')
+        await sendMessageToAPI(inputMessage, [], 'text')
         setInputMessage('')
       } finally {
         setIsLoading(false)
@@ -187,7 +190,11 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     }
   }
 
-  const sendMessageToAPI = async (content: string, type: string = 'text') => {
+  const sendMessageToAPI = async (
+    text: string,
+    media: any[] = [],
+    type: string = 'text',
+  ) => {
     if (!currentUserId) {
       alert('Please select a user first')
       return
@@ -196,7 +203,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     try {
       const token = localStorage.getItem('token')
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/chat/messages`,
+        `${process.env.NEXT_PUBLIC_API_URL}/chat/rooms/${id}/messages`,
         {
           method: 'POST',
           headers: {
@@ -204,9 +211,8 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            roomId: id,
-            content,
-            type,
+            text,
+            media, // Support for media array
           }),
         },
       )
@@ -217,8 +223,18 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
 
       const data = await response.json()
 
-      if (data.ok) {
-        setMessages((prev) => [...prev, data.message as Message])
+      if (data.ok && data.message) {
+        // Add sender info for display
+        const enrichedMessage = {
+          ...data.message,
+          sender: 'me' as const,
+          time: new Date(data.message.createdAt).toLocaleTimeString('ko-KR', {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          username: Auth.getUser()?.name,
+        }
+        setMessages((prev) => [...prev, enrichedMessage as Message])
         console.log('Message sent successfully')
       }
     } catch (error) {
@@ -228,19 +244,18 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
   }
 
   const handleEmojiSelect = async (emoji: string) => {
-    // setInputMessage(emoji)
-    await sendMessageToAPI(emoji, 'text')
+    await sendMessageToAPI(emoji, [], 'emoji')
     setShowEmojiModal(false)
   }
 
   const handleVoiceInputSelect = async (text: string) => {
-    await sendMessageToAPI(text, 'audio')
+    await sendMessageToAPI(text, [], 'voice')
     setShowVoiceModal(false)
   }
 
   const handleQuickResponseSelect = async (text: string) => {
     console.log('handleQuickResponseSelect', text)
-    await sendMessageToAPI(text, 'text')
+    await sendMessageToAPI(text, [], 'text')
     setShowQuickResponseModal(false)
     setInputMessage('')
   }
@@ -270,9 +285,8 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
         <div className="border-t border-border bg-card">
           <ContextHelper
             messages={messages.map((m: Message) => ({
-              sender: m.sender,
-              username: m.username,
-              text: m.text,
+              senderName: m.senderName,
+              text: m.text || '',
             }))}
           />
           <ActionButtons
@@ -327,8 +341,13 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
         open={showQuickResponseModal}
         onOpenChange={setShowQuickResponseModal}
         messages={messages.map((m: Message) => ({
+<<<<<<< HEAD
+          senderName: m.senderName,
+          text: m.text || '',
+=======
           sender: m.sender,
           text: m.text,
+>>>>>>> develop
         }))}
         onSelect={handleQuickResponseSelect}
       />

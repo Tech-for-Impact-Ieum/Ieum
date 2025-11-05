@@ -11,12 +11,26 @@ import { Button } from '@/components/ui/Button'
 import { CreateChatRoomModal } from '@/components/CreateChatRoomModal'
 
 interface ChatRoom {
-  id: string
+  id: number
   name: string
-  unread: number
-  time: string
+  imageUrl?: string
+  participantCount: number
+  roomType: 'direct' | 'group'
+  unreadCount: number
+  lastMessage?: {
+    id: string
+    text?: string
+    senderId: number
+    senderName: string
+    createdAt: string
+  }
+  lastMessageAt?: string
   participants: any[]
-  roomType: string
+  isPinned?: boolean
+  isMuted?: boolean
+  // Legacy
+  unread?: number
+  time?: string
 }
 
 export default function HomePage() {
@@ -40,7 +54,7 @@ export default function HomePage() {
     try {
       setLoading(true)
       const data = await ApiClient.get('/chat/rooms')
-      setRooms(data.rooms)
+      setRooms(data.rooms || [])
     } catch (error) {
       console.error('Failed to fetch chat rooms:', error)
     } finally {
@@ -51,6 +65,23 @@ export default function HomePage() {
   const filteredRooms = rooms.filter((room) =>
     room.name.toLowerCase().includes(searchQuery.toLowerCase()),
   )
+
+  // Helper to format time
+  const formatTime = (dateString?: string) => {
+    if (!dateString) return ''
+    const date = new Date(dateString)
+    const now = new Date()
+    const diff = now.getTime() - date.getTime()
+    const minutes = Math.floor(diff / 60000)
+
+    if (minutes < 1) return '방금 전'
+    if (minutes < 60) return `${minutes}분 전`
+    const hours = Math.floor(minutes / 60)
+    if (hours < 24) return `${hours}시간 전`
+    const days = Math.floor(hours / 24)
+    if (days < 7) return `${days}일 전`
+    return date.toLocaleDateString('ko-KR')
+  }
 
   if (loading) {
     return (
@@ -92,9 +123,13 @@ export default function HomePage() {
                 key={room.id}
                 id={room.id}
                 name={room.name}
-                lastMessage=""
-                time={room.time}
-                unread={room.unread}
+                lastMessage={room.lastMessage?.text || ''}
+                time={formatTime(
+                  room.lastMessage?.createdAt || room.lastMessageAt,
+                )}
+                unread={room.unreadCount}
+                imageUrl={room.imageUrl}
+                roomType={room.roomType}
               />
             ))
           )}

@@ -8,7 +8,7 @@ import { X } from 'lucide-react'
 interface QuickResponseModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  messages?: { sender: 'me' | 'other'; text: string }[]
+  messages?: { senderName: string; text: string }[]
   onSelect?: (text: string) => void
 }
 

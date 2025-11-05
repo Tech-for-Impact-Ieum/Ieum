@@ -1,12 +1,21 @@
 import { Message } from '@/lib/interface'
+import { Auth } from '@/lib/auth'
 
 export function ChatElement({ message }: { message: Message }) {
-  const isMyMessage = message.sender == 'me'
+  const currentUser = Auth.getUser()
+  const isMyMessage = currentUser ? message.senderId === currentUser.id : false
+
+  // Format time from createdAt
+  const formattedTime = new Date(message.createdAt).toLocaleTimeString('ko-KR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+
   return (
     <div
       key={message.id}
       className={`flex ${
-        message.sender === 'me' ? 'justify-end' : 'justify-start'
+        isMyMessage ? 'justify-end' : 'justify-start'
       }`}
     >
       <div
@@ -14,9 +23,9 @@ export function ChatElement({ message }: { message: Message }) {
           isMyMessage ? 'items-end' : 'items-start'
         }`}
       >
-        <SenderElement sender={message.username} isMyMessage={isMyMessage} />
+        <SenderElement sender={message.senderName} isMyMessage={isMyMessage} />
         <TextElement message={message} isMyMessage={isMyMessage} />
-        <TimeElement time={message.time} />
+        <TimeElement time={formattedTime} />
       </div>
     </div>
   )

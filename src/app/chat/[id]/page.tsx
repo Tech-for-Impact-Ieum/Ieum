@@ -6,7 +6,7 @@ import { ActionButtons, Input } from '@/components/ui/Input'
 import { VoiceInputModal } from '@/components/VoiceInputModal'
 import { EmojiPickerModal } from '@/components/EmojiPickerModal'
 import { QuickResponseModal } from '@/components/QuickResponseModal'
-import { ChatRoom, Message, User } from '@/lib/interface'
+import { ChatRoom, MediaItem, Message } from '@/lib/interface'
 import { ChatHeader } from '@/components/Header'
 import { ChatElement } from '@/components/Chat'
 import { ContextHelper } from '@/components/ContextHelper'
@@ -29,8 +29,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
   const { id } = use(params)
   const [messages, setMessages] = useState<Message[]>([])
   const [chatRoom, setChatRoom] = useState<ChatRoom | null>(null)
-  const [users, setUsers] = useState<User[]>([])
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null)
+  const currentUserId = Auth.getUserId()
   const [inputMessage, setInputMessage] = useState('')
   const [showVoiceModal, setShowVoiceModal] = useState(false)
   const [showEmojiModal, setShowEmojiModal] = useState(false)
@@ -47,32 +46,8 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     setIsComposing(false)
   }
 
-  // Load users from database
+  // Load chat room
   useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/users`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-          },
-        )
-        if (response.ok) {
-          const data = await response.json()
-          if (data.ok && data.users) {
-            setUsers(data.users)
-            // Auto-select first user if not already selected
-            if (data.users.length > 0 && !currentUserId) {
-              setCurrentUserId(data.users[0].id.toString())
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error loading users:', error)
-      }
-    }
     const loadChatRoom = async () => {
       try {
         const response = await fetch(
@@ -95,8 +70,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     }
 
     loadChatRoom()
-    loadUsers()
-  }, [])
+  }, [id])
 
   // Load existing messages from database when currentUserId changes
   useEffect(() => {
@@ -116,6 +90,16 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
           const data = await response.json()
           if (data.ok && data.messages) {
             setMessages(data.messages)
+            // Mark as read
+            await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/chat/rooms/${id}/read`,
+              {
+                method: 'POST',
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+              },
+            )
           }
         }
       } catch (error) {
@@ -156,16 +140,8 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
           console.log('  → Duplicate message, ignoring')
           return prev
         }
-        // Determine if message is from current user
-        const enrichedMessage = {
-          ...message,
-          sender:
-            message.senderId?.toString() === currentUserId?.toString()
-              ? 'me'
-              : 'other',
-        } as Message
-        console.log('  → Added message to state:', enrichedMessage)
-        return [...prev, enrichedMessage]
+        console.log('  → Added message to state:', message)
+        return [...prev, message]
       })
     })
 
@@ -182,7 +158,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     if (inputMessage.trim() && !isComposing && !isLoading) {
       setIsLoading(true)
       try {
-        await sendMessageToAPI(inputMessage, [], 'text')
+        await sendMessageToAPI(inputMessage, [])
         setInputMessage('')
       } finally {
         setIsLoading(false)
@@ -190,13 +166,9 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     }
   }
 
-  const sendMessageToAPI = async (
-    text: string,
-    media: any[] = [],
-    type: string = 'text',
-  ) => {
+  const sendMessageToAPI = async (text: string, media: MediaItem[] = []) => {
     if (!currentUserId) {
-      alert('Please select a user first')
+      alert('Please login first')
       return
     }
 
@@ -224,17 +196,8 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
       const data = await response.json()
 
       if (data.ok && data.message) {
-        // Add sender info for display
-        const enrichedMessage = {
-          ...data.message,
-          sender: 'me' as const,
-          time: new Date(data.message.createdAt).toLocaleTimeString('ko-KR', {
-            hour: '2-digit',
-            minute: '2-digit',
-          }),
-          username: Auth.getUser()?.name,
-        }
-        setMessages((prev) => [...prev, enrichedMessage as Message])
+        // Add message to state
+        setMessages((prev) => [...prev, data.message])
         console.log('Message sent successfully')
       }
     } catch (error) {
@@ -244,18 +207,18 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
   }
 
   const handleEmojiSelect = async (emoji: string) => {
-    await sendMessageToAPI(emoji, [], 'emoji')
+    await sendMessageToAPI(emoji, [])
     setShowEmojiModal(false)
   }
 
   const handleVoiceInputSelect = async (text: string) => {
-    await sendMessageToAPI(text, [], 'voice')
+    await sendMessageToAPI(text, [])
     setShowVoiceModal(false)
   }
 
   const handleQuickResponseSelect = async (text: string) => {
     console.log('handleQuickResponseSelect', text)
-    await sendMessageToAPI(text, [], 'text')
+    await sendMessageToAPI(text, [])
     setShowQuickResponseModal(false)
     setInputMessage('')
   }

@@ -70,9 +70,9 @@ export default function FriendsPage() {
       setAddSearchQuery('')
       setSearchResults([])
       fetchFriends()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to add friend:', error)
-      alert(error.message || '친구 추가에 실패했습니다')
+      alert(error instanceof Error ? error.message : '친구 추가에 실패했습니다')
     }
   }
 
@@ -186,7 +186,7 @@ export default function FriendsPage() {
               </p>
             ) : (
               <div className="space-y-2">
-                {searchResults.map((user) => (
+                {searchResults.map((user: User) => (
                   <div
                     key={user.id}
                     className="flex items-center justify-between p-3 border rounded-lg"
@@ -194,7 +194,7 @@ export default function FriendsPage() {
                     <div>
                       <p className="font-semibold">{user.name}</p>
                       <p className="text-sm text-gray-500">
-                        {user.email || user.phoneNumber || '정보 없음'}
+                        {user.email || user.phone || '정보 없음'}
                       </p>
                     </div>
                     {user.friendshipStatus === 'accepted' ? (

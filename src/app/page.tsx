@@ -25,7 +25,7 @@ interface ChatRoom {
     createdAt: string
   }
   lastMessageAt?: string
-  participants: any[]
+  // participants: any[]
   isPinned?: boolean
   isMuted?: boolean
   // Legacy

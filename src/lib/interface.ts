@@ -112,13 +112,89 @@ export interface ChatSummary {
 }
 
 // ============================================
+// Socket Event Types
+// ============================================
+
+export interface UserStatusChangedEvent {
+  userId: number
+  isOnline: boolean
+  lastSeenAt?: string
+}
+
+export interface UserJoinedEvent {
+  userId: number
+  roomId: number
+  userName: string
+}
+
+export interface UserLeftEvent {
+  userId: number
+  roomId: number
+  userName: string
+}
+
+export interface UnreadCountUpdateEvent {
+  roomId: number
+  unreadCount: number
+}
+
+export interface MessagesReadEvent {
+  roomId: number
+  messageId: string
+  userId: number
+}
+
+export interface UserTypingEvent {
+  roomId: number
+  userId: number
+  userName: string
+  isTyping: boolean
+}
+
+// ============================================
+// Error Types
+// ============================================
+
+export class AppError extends Error {
+  constructor(
+    message: string,
+    public code?: string,
+    public statusCode?: number
+  ) {
+    super(message)
+    this.name = 'AppError'
+  }
+}
+
+export class AuthError extends AppError {
+  constructor(message: string, code?: string) {
+    super(message, code, 401)
+    this.name = 'AuthError'
+  }
+}
+
+export class NetworkError extends AppError {
+  constructor(message: string, code?: string) {
+    super(message, code, 500)
+    this.name = 'NetworkError'
+  }
+}
+
+export class ValidationError extends AppError {
+  constructor(message: string, code?: string) {
+    super(message, code, 400)
+    this.name = 'ValidationError'
+  }
+}
+
+// ============================================
 // API Response Types
 // ============================================
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   ok: boolean
   error?: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export interface RoomsResponse extends ApiResponse {

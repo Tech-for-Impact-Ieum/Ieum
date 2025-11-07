@@ -1,5 +1,6 @@
 import * as React from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden'
 import { X } from 'lucide-react'
 import { cn } from '../../lib/ui-utils'
 
@@ -152,12 +153,18 @@ interface ModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   children: React.ReactNode
+  title?: string
 }
 
-export function Modal({ open, onOpenChange, children }: ModalProps) {
+export function Modal({ open, onOpenChange, children, title = 'Dialog' }: ModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContentWithRef>{children}</DialogContentWithRef>
+      <DialogContentWithRef>
+        <VisuallyHidden.Root>
+          <DialogTitleWithRef>{title}</DialogTitleWithRef>
+        </VisuallyHidden.Root>
+        {children}
+      </DialogContentWithRef>
     </Dialog>
   )
 }

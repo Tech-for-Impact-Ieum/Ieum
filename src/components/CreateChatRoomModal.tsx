@@ -5,7 +5,7 @@ import { Modal } from './ui/Modal'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
 import { ApiClient } from '@/lib/api-client'
-import { User } from '@/lib/interface'
+import { User, AppError } from '@/lib/interface'
 
 interface CreateChatRoomModalProps {
   open: boolean
@@ -76,9 +76,15 @@ export function CreateChatRoomModal({
       setSelectedFriends([])
       onOpenChange(false)
       onRoomCreated?.()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to create room:', error)
-      alert(error.message || '채팅방 생성에 실패했습니다')
+      if (error instanceof AppError) {
+        alert(error.message)
+      } else if (error instanceof Error) {
+        alert(error.message)
+      } else {
+        alert('채팅방 생성에 실패했습니다')
+      }
     } finally {
       setLoading(false)
     }

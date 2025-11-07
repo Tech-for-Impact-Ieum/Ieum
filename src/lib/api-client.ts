@@ -27,7 +27,7 @@ export class ApiClient {
     return this.handleResponse(response)
   }
 
-  static async post(endpoint: string, data?: any) {
+  static async post(endpoint: string, data?: unknown) {
     const response = await fetch(`${API_URL}${endpoint}`, {
       method: 'POST',
       headers: this.getAuthHeaders(),
@@ -36,7 +36,7 @@ export class ApiClient {
     return this.handleResponse(response)
   }
 
-  static async put(endpoint: string, data: any) {
+  static async put(endpoint: string, data: unknown) {
     const response = await fetch(`${API_URL}${endpoint}`, {
       method: 'PUT',
       headers: this.getAuthHeaders(),
@@ -45,7 +45,7 @@ export class ApiClient {
     return this.handleResponse(response)
   }
 
-  static async patch(endpoint: string, data: any) {
+  static async patch(endpoint: string, data: unknown) {
     const response = await fetch(`${API_URL}${endpoint}`, {
       method: 'PATCH',
       headers: this.getAuthHeaders(),

@@ -1,6 +1,17 @@
 'use client'
 
 import { io, Socket } from 'socket.io-client'
+import {
+  Message,
+  ChatRoom,
+  MediaItem,
+  UserStatusChangedEvent,
+  UserJoinedEvent,
+  UserLeftEvent,
+  UnreadCountUpdateEvent,
+  MessagesReadEvent,
+  UserTypingEvent,
+} from './interface'
 
 let socket: Socket | null = null
 
@@ -96,7 +107,7 @@ export function leaveRoom(roomId: number | string) {
   }
 }
 
-export function onNewMessage(callback: (message: any) => void) {
+export function onNewMessage(callback: (message: Message) => void) {
   console.log('👂 Setting up listener for "new-message" event')
   if (socket) {
     socket.on('new-message', callback)
@@ -113,7 +124,7 @@ export function onNewMessage(callback: (message: any) => void) {
   }
 }
 
-export function onRoomUpdate(callback: (room: any) => void) {
+export function onRoomUpdate(callback: (room: ChatRoom) => void) {
   if (socket) {
     socket.on('room-updated', callback)
   }
@@ -125,7 +136,9 @@ export function onRoomUpdate(callback: (room: any) => void) {
   }
 }
 
-export function onUserStatusChanged(callback: (data: any) => void) {
+export function onUserStatusChanged(
+  callback: (data: UserStatusChangedEvent) => void,
+) {
   if (socket) {
     socket.on('user-status-changed', callback)
   }
@@ -137,7 +150,7 @@ export function onUserStatusChanged(callback: (data: any) => void) {
   }
 }
 
-export function onUserJoined(callback: (data: any) => void) {
+export function onUserJoined(callback: (data: UserJoinedEvent) => void) {
   if (socket) {
     socket.on('user-joined', callback)
   }
@@ -149,7 +162,7 @@ export function onUserJoined(callback: (data: any) => void) {
   }
 }
 
-export function onUserLeft(callback: (data: any) => void) {
+export function onUserLeft(callback: (data: UserLeftEvent) => void) {
   if (socket) {
     socket.on('user-left', callback)
   }
@@ -167,7 +180,11 @@ export function onUserLeft(callback: (data: any) => void) {
  * @param text Text content (optional if media is present)
  * @param media Array of media items (optional)
  */
-export function sendMessage(roomId: number, text?: string, media: any[] = []) {
+export function sendMessage(
+  roomId: number,
+  text?: string,
+  media: MediaItem[] = [],
+) {
   if (socket && socket.connected) {
     socket.emit('send-message', { roomId, text, media })
   } else {
@@ -200,7 +217,9 @@ export function sendTypingIndicator(roomId: number, isTyping: boolean) {
 /**
  * Listen for unread count updates
  */
-export function onUnreadCountUpdate(callback: (data: any) => void) {
+export function onUnreadCountUpdate(
+  callback: (data: UnreadCountUpdateEvent) => void,
+) {
   if (socket) {
     socket.on('unread-count-update', callback)
   }
@@ -215,7 +234,7 @@ export function onUnreadCountUpdate(callback: (data: any) => void) {
 /**
  * Listen for messages read events
  */
-export function onMessagesRead(callback: (data: any) => void) {
+export function onMessagesRead(callback: (data: MessagesReadEvent) => void) {
   if (socket) {
     socket.on('messages-read', callback)
   }
@@ -230,7 +249,7 @@ export function onMessagesRead(callback: (data: any) => void) {
 /**
  * Listen for typing indicator
  */
-export function onUserTyping(callback: (data: any) => void) {
+export function onUserTyping(callback: (data: UserTypingEvent) => void) {
   if (socket) {
     socket.on('user-typing', callback)
   }

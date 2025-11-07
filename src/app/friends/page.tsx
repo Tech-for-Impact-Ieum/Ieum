@@ -32,6 +32,10 @@ export default function FriendsPage() {
     fetchFriends()
   }, [router])
 
+  useEffect(() => {
+    console.log(friends)
+  }, [friends])
+
   const fetchFriends = async () => {
     try {
       setLoading(true)

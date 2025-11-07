@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Auth } from '@/lib/auth'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { AppError } from '@/lib/interface'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -38,9 +39,15 @@ export default function LoginPage() {
         console.log('Registration successful:', result)
         router.push('/')
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Auth error:', err)
-      setError(err.message || '로그인/회원가입에 실패했습니다')
+      if (err instanceof AppError) {
+        setError(err.message)
+      } else if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('로그인/회원가입에 실패했습니다')
+      }
     } finally {
       setLoading(false)
     }

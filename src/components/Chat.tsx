@@ -34,7 +34,6 @@ export function ChatElement({ message }: { message: Message }) {
                 mediaItem={mediaItem}
                 transcript={message.text || ''}
               />
-              <Transcript text={message.text || ''} />
             </div>
           ))}
         <TextElement message={message} isMyMessage={isMyMessage} />

@@ -6,6 +6,7 @@ import { ActionButtons, Input } from '@/components/ui/Input'
 import { VoiceInputModal } from '@/components/VoiceInputModal'
 import { EmojiPickerModal } from '@/components/EmojiPickerModal'
 import { QuickResponseModal } from '@/components/QuickResponseModal'
+import { MediaPickerModal } from '@/components/MediaPickerModal'
 import { ChatRoom, MediaItem, Message } from '@/lib/interface'
 import { ChatHeader } from '@/components/Header'
 import { ChatElement } from '@/components/Chat'
@@ -34,6 +35,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
   const [showVoiceModal, setShowVoiceModal] = useState(false)
   const [showEmojiModal, setShowEmojiModal] = useState(false)
   const [showQuickResponseModal, setShowQuickResponseModal] = useState(false)
+  const [showMediaModal, setShowMediaModal] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -211,8 +213,61 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     setShowEmojiModal(false)
   }
 
-  const handleVoiceInputSelect = async (text: string) => {
-    await sendMessageToAPI(text, [])
+  const handleVoiceInputSelect = async (
+    text: string,
+    audioBlob: Blob | null,
+  ) => {
+    if (!audioBlob) {
+      // If no audio blob, just send text
+      await sendMessageToAPI(text, [])
+      setShowVoiceModal(false)
+      return
+    }
+
+    try {
+      // Upload the audio file first
+      const formData = new FormData()
+      formData.append(
+        'file',
+        new File([audioBlob], 'voice.webm', {
+          type: audioBlob.type || 'audio/webm',
+        }),
+      )
+
+      const uploadResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/upload`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: formData,
+        },
+      )
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload audio file')
+      }
+
+      const uploadData = await uploadResponse.json()
+
+      if (uploadData.ok && uploadData.url) {
+        // Create MediaItem with the uploaded audio
+        const audioMedia: MediaItem = {
+          type: 'audio',
+          url: uploadData.url,
+          fileName: 'voice.webm',
+          fileSize: audioBlob.size,
+        }
+
+        // Send message with text (transcript) and audio media
+        await sendMessageToAPI(text, [audioMedia])
+      }
+    } catch (error) {
+      console.error('Error uploading audio:', error)
+      alert('음성 파일 업로드에 실패했습니다.')
+    }
+
     setShowVoiceModal(false)
   }
 
@@ -221,6 +276,11 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     await sendMessageToAPI(text, [])
     setShowQuickResponseModal(false)
     setInputMessage('')
+  }
+
+  const handleMediaSelect = async (media: MediaItem[]) => {
+    await sendMessageToAPI('', media)
+    setShowMediaModal(false)
   }
 
   useEffect(() => {
@@ -256,6 +316,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
             setShowEmojiModal={setShowEmojiModal}
             setShowVoiceModal={setShowVoiceModal}
             setShowQuickResponseModal={setShowQuickResponseModal}
+            setShowMediaModal={setShowMediaModal}
           />
 
           {/* Message Input */}
@@ -299,6 +360,11 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
         open={showEmojiModal}
         onOpenChange={setShowEmojiModal}
         onEmojiSelect={handleEmojiSelect}
+      />
+      <MediaPickerModal
+        open={showMediaModal}
+        onOpenChange={setShowMediaModal}
+        onSend={handleMediaSelect}
       />
       <QuickResponseModal
         open={showQuickResponseModal}

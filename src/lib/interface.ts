@@ -93,6 +93,7 @@ export interface ChatRoom {
   participants: User[]
   isPinned?: boolean
   isMuted?: boolean
+
   // Legacy fields
   messages?: Message[]
   unread?: number
@@ -159,7 +160,7 @@ export class AppError extends Error {
   constructor(
     message: string,
     public code?: string,
-    public statusCode?: number
+    public statusCode?: number,
   ) {
     super(message)
     this.name = 'AppError'

@@ -8,7 +8,7 @@ import { Mic } from 'lucide-react'
 interface VoiceInputModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSend: (text: string) => void
+  onSend: (text: string, audioBlob: Blob | null) => void
 }
 
 export function VoiceInputModal({
@@ -20,6 +20,7 @@ export function VoiceInputModal({
   const [recordingTime, setRecordingTime] = useState(0)
   const [transcript, setTranscript] = useState('')
   const [isTranscribing, setIsTranscribing] = useState(false)
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const mediaStreamRef = useRef<MediaStream | null>(null)
   const recordedChunksRef = useRef<BlobPart[]>([])
@@ -42,6 +43,7 @@ export function VoiceInputModal({
       setTranscript('')
       setRecordingTime(0)
       setIsRecording(false)
+      setAudioBlob(null)
     } else {
       stopRecording()
     }
@@ -56,6 +58,7 @@ export function VoiceInputModal({
   const handleRetry = () => {
     setRecordingTime(0)
     setTranscript('')
+    setAudioBlob(null)
     startRecording().catch((e) => console.error(e))
   }
 
@@ -68,6 +71,10 @@ export function VoiceInputModal({
       setIsTranscribing(true)
       const blob = await stopRecording()
       if (!blob) return
+
+      // Store the audio blob for later upload (regardless of transcription success)
+      setAudioBlob(blob)
+
       const form = new FormData()
       // Use .webm since MediaRecorder default in Chrome produces webm/opus
       form.append(
@@ -81,18 +88,22 @@ export function VoiceInputModal({
       const data = await res.json()
       if (!res.ok || !data.ok) {
         console.error('Transcription failed', data)
+        // Don't return - allow user to send audio without transcript
+        setTranscript('')
         return
       }
       setTranscript(data.text || '')
     } catch (e) {
       console.error('Failed to send transcription', e)
+      // Still allow sending the audio even if transcription fails
+      setTranscript('')
     } finally {
       setIsTranscribing(false)
     }
   }
 
   const handleSend = () => {
-    onSend(transcript)
+    onSend(transcript, audioBlob)
     onOpenChange(false)
   }
 
@@ -161,18 +172,25 @@ export function VoiceInputModal({
           </div>
 
           {/* Transcript preview */}
-          {!isRecording && isTranscribing && !transcript && (
+          {!isRecording && isTranscribing && (
             <div className="text-lg text-muted-foreground">처리 중…</div>
           )}
-          {!isRecording && transcript && (
+          {!isRecording && audioBlob && transcript && (
             <div className="w-full rounded-md border p-3 text-lg text-muted-foreground">
               {transcript}
+            </div>
+          )}
+          {!isRecording && audioBlob && !transcript && !isTranscribing && (
+            <div className="w-full rounded-md border p-3 text-lg text-muted-foreground text-center">
+              {/* FIXME: minimize text if needed */}
+              <div>음성 인식에 실패했습니다.</div>
+              <div>오디오만 전송합니다.</div>
             </div>
           )}
 
           <div className="flex gap-3">
             {/* Initial state: show start button */}
-            {!isRecording && !transcript && (
+            {!isRecording && !audioBlob && (
               <Button onClick={handleStart} className="min-w-[120px]">
                 녹음 시작
               </Button>
@@ -190,7 +208,7 @@ export function VoiceInputModal({
             )}
 
             {/* After transcription: show retry and send */}
-            {!isRecording && transcript && (
+            {!isRecording && audioBlob && (
               <>
                 <Button
                   variant="outline"
@@ -202,7 +220,7 @@ export function VoiceInputModal({
                 <Button
                   onClick={handleSend}
                   className="min-w-[120px]"
-                  disabled={!transcript}
+                  disabled={!audioBlob}
                 >
                   보내기
                 </Button>

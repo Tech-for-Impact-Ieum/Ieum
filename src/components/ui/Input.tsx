@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { cn } from '../../lib/ui-utils'
 import { Button } from './Button'
-import { MessageSquarePlus, Mic, Smile } from 'lucide-react'
+import { Image, MessageSquarePlus, Mic, Smile } from 'lucide-react'
 
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement>
 
@@ -51,18 +51,23 @@ export function ActionButtons({
   setShowEmojiModal,
   setShowVoiceModal,
   setShowQuickResponseModal,
+  setShowMediaModal,
 }: {
   setShowEmojiModal: (show: boolean) => void
   setShowVoiceModal: (show: boolean) => void
   setShowQuickResponseModal: (show: boolean) => void
+  setShowMediaModal: (show: boolean) => void
 }) {
   return (
-    <div className="grid grid-cols-3 items-center justify-center gap-2 divide-x divide-1 divide-gray px-4 py-2">
+    <div className="grid grid-cols-4 items-center justify-center gap-2 divide-x divide-1 divide-gray px-4 py-2">
       <ActionButton setShowModal={setShowEmojiModal} title="이모티콘">
         <Smile size={48} />
       </ActionButton>
       <ActionButton setShowModal={setShowVoiceModal} title="음성 인식">
         <Mic size={48} />
+      </ActionButton>
+      <ActionButton setShowModal={setShowMediaModal} title="이미지">
+        <Image size={48} />
       </ActionButton>
       <ActionButton setShowModal={setShowQuickResponseModal} title="빠른 답장">
         <MessageSquarePlus size={48} />

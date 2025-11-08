@@ -7,6 +7,7 @@ import { VoiceInputModal } from '@/components/VoiceInputModal'
 import { EmojiPickerModal } from '@/components/EmojiPickerModal'
 import { QuickResponseModal } from '@/components/QuickResponseModal'
 import { MediaUploader } from '@/components/MediaUploader'
+import { ChatSummary } from '@/components/ChatSummary'
 import { ChatRoom, MediaItem, Message } from '@/lib/interface'
 import { ChatHeader } from '@/components/Header'
 import { ChatElement } from '@/components/Chat'
@@ -36,6 +37,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
   const [showEmojiModal, setShowEmojiModal] = useState(false)
   const [showQuickResponseModal, setShowQuickResponseModal] = useState(false)
   const [showMediaUploader, setShowMediaUploader] = useState(false)
+  const [showSummary, setShowSummary] = useState(false)
   const [pendingMedia, setPendingMedia] = useState<MediaItem[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -260,7 +262,11 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
   return (
     <>
       <div className="flex h-full flex-col">
-        {chatRoom && <ChatHeader title={chatRoom.name} />}
+        {chatRoom && (
+          <div className="relative">
+            <ChatHeader title={chatRoom.name} />
+          </div>
+        )}
 
         {/* Messages List */}
         <div className="flex-1 overflow-y-auto bg-kakao-skyblue p-4">
@@ -274,13 +280,8 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
 
         {/* Input Area */}
         <div className="border-t border-border bg-card">
-          <ContextHelper
-            messages={messages.map((m: Message) => ({
-              senderName: m.senderName,
-              text: m.text || '',
-            }))}
-          />
           <ActionButtons
+            setShowSummaryModal={setShowSummary}
             setShowEmojiModal={setShowEmojiModal}
             setShowVoiceModal={setShowVoiceModal}
             setShowQuickResponseModal={setShowQuickResponseModal}
@@ -369,6 +370,23 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
         }))}
         onSelect={handleQuickResponseSelect}
       />
+      {/* Summary Modal */}
+      {/* 발달장애인용으로 보여주기 */}
+      {showSummary && chatRoom && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl">
+            <ChatSummary
+              roomId={
+                typeof chatRoom.id === 'string'
+                  ? parseInt(chatRoom.id, 10)
+                  : chatRoom.id
+              }
+              onClose={() => setShowSummary(false)}
+              autoLoad={true}
+            />
+          </div>
+        </div>
+      )}
     </>
   )
 }

@@ -26,6 +26,10 @@ export function ChatElement({ message }: { message: Message }) {
   // Extract only images for lightbox
   const imageMedia = message.media.filter((item) => item.type === 'image')
 
+  // Calculate read status for my messages
+  const readCount = message.readBy ? message.readBy.length : 0
+  const hasBeenRead = readCount > 0
+
   const handleImageClick = (mediaIndex: number) => {
     // Find the index in imageMedia array
     const imageIndex = imageMedia.findIndex(
@@ -62,7 +66,15 @@ export function ChatElement({ message }: { message: Message }) {
           {hasText && (
             <TextElement message={message} isMyMessage={isMyMessage} />
           )}
-          <TimeElement time={formattedTime} />
+          <div className="flex items-center gap-2">
+            <TimeElement time={formattedTime} />
+            {isMyMessage && (
+              <ReadStatusElement
+                readCount={readCount}
+                hasBeenRead={hasBeenRead}
+              />
+            )}
+          </div>
         </div>
       </div>
 
@@ -229,4 +241,34 @@ function SenderElement({
 // TODO: do not show time if sender & time are same as previous message
 function TimeElement({ time }: { time: string }) {
   return <span className="px-2 text-xs text-muted-foreground">{time}</span>
+}
+
+function ReadStatusElement({
+  readCount,
+  hasBeenRead,
+}: {
+  readCount: number
+  hasBeenRead: boolean
+}) {
+  if (!hasBeenRead) {
+    return null // Don't show anything if unread
+  }
+
+  return (
+    <span className="text-xs text-blue-600 font-medium flex items-center gap-1">
+      <svg
+        className="w-3 h-3"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          fillRule="evenodd"
+          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+          clipRule="evenodd"
+        />
+      </svg>
+      {readCount > 1 ? `${readCount}명 읽음` : '읽음'}
+    </span>
+  )
 }

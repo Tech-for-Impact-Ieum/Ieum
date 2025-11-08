@@ -9,6 +9,7 @@ import { Auth } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { CreateChatRoomModal } from '@/components/CreateChatRoomModal'
+import { initSocketClient, onUnreadCountUpdate } from '@/lib/socket-client'
 
 interface ChatRoom {
   id: number
@@ -48,6 +49,28 @@ export default function HomePage() {
     }
 
     fetchRooms()
+
+    // Initialize socket for real-time updates
+    const token = localStorage.getItem('token')
+    if (token) {
+      initSocketClient(token)
+
+      // Listen for real-time unread count updates
+      const unsubscribe = onUnreadCountUpdate((data) => {
+        console.log('📊 Unread count update:', data)
+        setRooms((prev) =>
+          prev.map((room) =>
+            room.id === data.roomId
+              ? { ...room, unreadCount: data.unreadCount }
+              : room,
+          ),
+        )
+      })
+
+      return () => {
+        unsubscribe()
+      }
+    }
   }, [router])
 
   const fetchRooms = async () => {

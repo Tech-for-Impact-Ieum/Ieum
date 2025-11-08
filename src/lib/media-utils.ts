@@ -18,7 +18,14 @@ const MAX_FILE_SIZE = {
 
 const ALLOWED_MIME_TYPES = {
   image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
-  audio: ['audio/mpeg', 'audio/wav', 'audio/m4a', 'audio/mp4', 'audio/x-m4a'],
+  audio: [
+    'audio/mpeg',
+    'audio/wav',
+    'audio/m4a',
+    'audio/mp4',
+    'audio/x-m4a',
+    'audio/webm',
+  ],
   video: ['video/mp4', 'video/quicktime', 'video/x-msvideo'],
   file: [
     'application/pdf',

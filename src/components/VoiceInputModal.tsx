@@ -104,6 +104,7 @@ export function VoiceInputModal({
       )
 
       const token = localStorage.getItem('token')
+      // audioUrl is required
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transcribe`, {
         method: 'POST',
         headers: {

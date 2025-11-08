@@ -1,10 +1,14 @@
 import { Message, MediaItem } from '@/lib/interface'
 import { Auth } from '@/lib/auth'
 import Image from 'next/image'
+import { useState } from 'react'
+import { ImageLightbox } from './ImageLightbox'
 
 export function ChatElement({ message }: { message: Message }) {
   const currentUser = Auth.getUser()
   const isMyMessage = currentUser ? message.senderId === currentUser.id : false
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [lightboxIndex, setLightboxIndex] = useState(0)
 
   // Format time from createdAt
   const formattedTime = new Date(message.createdAt).toLocaleTimeString(
@@ -18,40 +22,80 @@ export function ChatElement({ message }: { message: Message }) {
   const hasMedia = message.media && message.media.length > 0
   const hasText = message.text && message.text.trim().length > 0
 
+  // Extract only images for lightbox
+  const imageMedia = message.media.filter((item) => item.type === 'image')
+
+  const handleImageClick = (mediaIndex: number) => {
+    // Find the index in imageMedia array
+    const imageIndex = imageMedia.findIndex(
+      (img) => img === message.media[mediaIndex],
+    )
+    if (imageIndex !== -1) {
+      setLightboxIndex(imageIndex)
+      setLightboxOpen(true)
+    }
+  }
+
   return (
-    <div
-      key={message.id}
-      className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}
-    >
+    <>
       <div
-        className={`flex max-w-[75%] flex-col gap-1 ${
-          isMyMessage ? 'items-end' : 'items-start'
-        }`}
+        key={message.id}
+        className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}
       >
-        <SenderElement sender={message.senderName} isMyMessage={isMyMessage} />
-        {hasMedia && (
-          <MediaElement media={message.media} isMyMessage={isMyMessage} />
-        )}
-        {hasText && <TextElement message={message} isMyMessage={isMyMessage} />}
-        <TimeElement time={formattedTime} />
+        <div
+          className={`flex max-w-[75%] flex-col gap-1 ${
+            isMyMessage ? 'items-end' : 'items-start'
+          }`}
+        >
+          <SenderElement
+            sender={message.senderName}
+            isMyMessage={isMyMessage}
+          />
+          {hasMedia && (
+            <MediaElement
+              media={message.media}
+              isMyMessage={isMyMessage}
+              onImageClick={handleImageClick}
+            />
+          )}
+          {hasText && (
+            <TextElement message={message} isMyMessage={isMyMessage} />
+          )}
+          <TimeElement time={formattedTime} />
+        </div>
       </div>
-    </div>
+
+      {/* Lightbox for images */}
+      {imageMedia.length > 0 && (
+        <ImageLightbox
+          images={imageMedia}
+          initialIndex={lightboxIndex}
+          isOpen={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
+    </>
   )
 }
 
 function MediaElement({
   media,
   isMyMessage,
+  onImageClick,
 }: {
   media: MediaItem[]
   isMyMessage: boolean
+  onImageClick?: (index: number) => void
 }) {
   return (
     <div className="flex flex-col gap-2">
       {media.map((item, index) => (
         <div key={index} className="overflow-hidden rounded-lg">
           {item.type === 'image' && (
-            <div className="relative">
+            <div
+              className="relative cursor-pointer hover:opacity-90 transition-opacity group"
+              onClick={() => onImageClick?.(index)}
+            >
               <Image
                 src={item.url}
                 alt={item.fileName || 'Image'}
@@ -60,6 +104,22 @@ function MediaElement({
                 className="max-w-full h-auto rounded-lg"
                 style={{ maxWidth: '300px' }}
               />
+              {/* Hover overlay */}
+              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all rounded-lg flex items-center justify-center">
+                <svg
+                  className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
+                  />
+                </svg>
+              </div>
             </div>
           )}
           {item.type === 'video' && (

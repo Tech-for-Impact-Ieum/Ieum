@@ -134,6 +134,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     // Convert roomId to number for socket
     const numericRoomId =
       typeof chatRoom.id === 'string' ? parseInt(chatRoom.id, 10) : chatRoom.id
+
     joinRoom(numericRoomId)
 
     // Listen for new messages from other users
@@ -141,7 +142,10 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
       console.log('✓ Received new message:', message)
       setMessages((prev) => {
         // Avoid duplicate messages
-        if (prev.some((msg) => msg.id === message.id)) {
+        if (
+          prev.some((msg) => msg.id === message.id) ||
+          message.senderId === currentUserId
+        ) {
           console.log('  → Duplicate message, ignoring')
           return prev
         }

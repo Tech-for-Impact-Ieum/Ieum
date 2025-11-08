@@ -15,6 +15,7 @@ import {
   onUnreadCountUpdate,
   onNewMessage,
   joinRoom,
+  leaveRoom,
 } from '@/lib/socket-client'
 
 interface ChatRoom {

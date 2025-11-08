@@ -14,6 +14,7 @@ import {
 } from './interface'
 
 let socket: Socket | null = null
+let joinedRooms: Set<number> = new Set()
 
 export function initSocketClient(token?: string) {
   if (socket?.connected) {
@@ -44,6 +45,8 @@ export function initSocketClient(token?: string) {
 
   socket.on('disconnect', (reason) => {
     console.log('⊖ Socket disconnected:', reason)
+    // Clear joined rooms on disconnect
+    joinedRooms.clear()
   })
 
   socket.on('connect_error', (error) => {
@@ -70,6 +73,7 @@ export function disconnectSocket() {
   if (socket) {
     socket.disconnect()
     socket = null
+    joinedRooms.clear()
   }
 }
 
@@ -83,15 +87,28 @@ export function joinRoom(roomId: number | string) {
   const numericRoomId =
     typeof roomId === 'string' ? parseInt(roomId, 10) : roomId
 
+  // Check if already joined this room
+  if (joinedRooms.has(numericRoomId)) {
+    console.log(`⏩ Already joined room: ${numericRoomId}, skipping`)
+    return
+  }
+
   if (socket && socket.connected) {
     socket.emit('join-room', numericRoomId)
+    joinedRooms.add(numericRoomId)
     console.log(`📍 Emitting join-room for: ${numericRoomId}`)
   } else {
     console.warn(`⏳ Socket not yet connected, waiting...`)
     // Wait for connection then join
     socket.once('connect', () => {
-      socket?.emit('join-room', numericRoomId)
-      console.log(`📍 Emitting join-room for: ${numericRoomId} (after connect)`)
+      // Check again in case it was joined while waiting
+      if (!joinedRooms.has(numericRoomId)) {
+        socket?.emit('join-room', numericRoomId)
+        joinedRooms.add(numericRoomId)
+        console.log(
+          `📍 Emitting join-room for: ${numericRoomId} (after connect)`,
+        )
+      }
     })
   }
 }
@@ -103,6 +120,7 @@ export function leaveRoom(roomId: number | string) {
       typeof roomId === 'string' ? parseInt(roomId, 10) : roomId
 
     socket.emit('leave-room', numericRoomId)
+    joinedRooms.delete(numericRoomId)
     console.log(`Left room: ${numericRoomId}`)
   }
 }

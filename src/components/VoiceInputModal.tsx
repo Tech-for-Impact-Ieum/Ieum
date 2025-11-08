@@ -3,12 +3,16 @@
 import { useState, useEffect, useRef } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/Modal'
 import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
 import { Mic } from 'lucide-react'
+import { uploadToS3 } from '@/lib/media-utils'
+import { MediaItem } from '@/lib/interface'
+import { AudioPlayer } from './AudioPlayer'
 
 interface VoiceInputModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSend: (text: string) => void
+  onSend: (text: string, audioMedia?: MediaItem) => void
 }
 
 export function VoiceInputModal({
@@ -20,6 +24,10 @@ export function VoiceInputModal({
   const [recordingTime, setRecordingTime] = useState(0)
   const [transcript, setTranscript] = useState('')
   const [isTranscribing, setIsTranscribing] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
+  const [audioUrl, setAudioUrl] = useState<string | null>(null)
+  const [audioMedia, setAudioMedia] = useState<MediaItem | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const mediaStreamRef = useRef<MediaStream | null>(null)
   const recordedChunksRef = useRef<BlobPart[]>([])
@@ -42,8 +50,16 @@ export function VoiceInputModal({
       setTranscript('')
       setRecordingTime(0)
       setIsRecording(false)
+      setAudioBlob(null)
+      setAudioUrl(null)
+      setAudioMedia(null)
+      setIsUploading(false)
     } else {
       stopRecording()
+      // Clean up audio URL
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl)
+      }
     }
   }, [open])
 
@@ -56,6 +72,12 @@ export function VoiceInputModal({
   const handleRetry = () => {
     setRecordingTime(0)
     setTranscript('')
+    setAudioBlob(null)
+    setAudioMedia(null)
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl)
+      setAudioUrl(null)
+    }
     startRecording().catch((e) => console.error(e))
   }
 
@@ -68,30 +90,69 @@ export function VoiceInputModal({
       setIsTranscribing(true)
       const blob = await stopRecording()
       if (!blob) return
+
+      // Save blob for preview and upload
+      setAudioBlob(blob)
+      const previewUrl = URL.createObjectURL(blob)
+      setAudioUrl(previewUrl)
+
+      // Transcribe audio to text
       const form = new FormData()
-      // Use .webm since MediaRecorder default in Chrome produces webm/opus
       form.append(
         'file',
         new File([blob], 'audio.webm', { type: blob.type || 'audio/webm' }),
       )
-      const res = await fetch('/api/transcribe', {
+
+      const token = localStorage.getItem('token')
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transcribe`, {
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: form,
       })
+
       const data = await res.json()
       if (!res.ok || !data.ok) {
         console.error('Transcription failed', data)
+        setTranscript('음성을 텍스트로 변환할 수 없습니다.')
         return
       }
       setTranscript(data.text || '')
     } catch (e) {
-      console.error('Failed to send transcription', e)
+      console.error('Failed to transcribe audio', e)
+      setTranscript('음성을 텍스트로 변환하는 중 오류가 발생했습니다.')
     } finally {
       setIsTranscribing(false)
     }
   }
 
-  const handleSend = () => {
+  const handleUploadAndSend = async () => {
+    if (!audioBlob || !transcript) return
+
+    try {
+      setIsUploading(true)
+
+      // Upload audio to S3
+      const audioFile = new File([audioBlob], 'voice-message.webm', {
+        type: 'audio/webm',
+      })
+
+      const uploadedMedia = await uploadToS3(audioFile)
+      setAudioMedia(uploadedMedia)
+
+      // Send message with text and audio
+      onSend(transcript, uploadedMedia)
+      onOpenChange(false)
+    } catch (e) {
+      console.error('Failed to upload audio', e)
+      alert('음성 업로드에 실패했습니다. 다시 시도해주세요.')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleSendTextOnly = () => {
     onSend(transcript)
     onOpenChange(false)
   }
@@ -160,13 +221,52 @@ export function VoiceInputModal({
             {formatTime(recordingTime)}
           </div>
 
-          {/* Transcript preview */}
-          {!isRecording && isTranscribing && !transcript && (
-            <div className="text-lg text-muted-foreground">처리 중…</div>
+          {/* Transcription loading */}
+          {!isRecording && isTranscribing && (
+            <div className="flex items-center gap-2 text-lg text-muted-foreground">
+              <svg
+                className="w-5 h-5 animate-spin"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+              텍스트 변환 중...
+            </div>
           )}
+
+          {/* Audio preview */}
+          {!isRecording && audioUrl && (
+            <div className="w-full">
+              <AudioPlayer src={audioUrl} variant="compact" />
+            </div>
+          )}
+
+          {/* Editable transcript */}
           {!isRecording && transcript && (
-            <div className="w-full rounded-md border p-3 text-lg text-muted-foreground">
-              {transcript}
+            <div className="w-full">
+              <label className="text-sm text-gray-600 mb-1 block">
+                변환된 텍스트 (수정 가능)
+              </label>
+              <Input
+                type="text"
+                value={transcript}
+                onChange={(e) => setTranscript(e.target.value)}
+                placeholder="변환된 텍스트를 수정하세요"
+                className="w-full text-lg"
+              />
             </div>
           )}
 
@@ -189,23 +289,59 @@ export function VoiceInputModal({
               </Button>
             )}
 
-            {/* After transcription: show retry and send */}
+            {/* After transcription: show retry and send options */}
             {!isRecording && transcript && (
               <>
                 <Button
                   variant="outline"
                   onClick={handleRetry}
                   className="min-w-[120px] bg-transparent"
+                  disabled={isUploading}
                 >
                   다시 녹음
                 </Button>
-                <Button
-                  onClick={handleSend}
-                  className="min-w-[120px]"
-                  disabled={!transcript}
-                >
-                  보내기
-                </Button>
+                {audioBlob ? (
+                  <Button
+                    onClick={handleUploadAndSend}
+                    className="min-w-[120px]"
+                    disabled={!transcript || isUploading}
+                  >
+                    {isUploading ? (
+                      <span className="flex items-center gap-2">
+                        <svg
+                          className="w-4 h-4 animate-spin"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
+                        </svg>
+                        업로드 중...
+                      </span>
+                    ) : (
+                      '음성 + 텍스트 전송'
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleSendTextOnly}
+                    className="min-w-[120px]"
+                    disabled={!transcript}
+                  >
+                    텍스트만 전송
+                  </Button>
+                )}
               </>
             )}
           </div>

@@ -3,6 +3,7 @@ import { Auth } from '@/lib/auth'
 import Image from 'next/image'
 import { useState } from 'react'
 import { ImageLightbox } from './ImageLightbox'
+import { AudioPlayer } from './AudioPlayer'
 
 export function ChatElement({ message }: { message: Message }) {
   const currentUser = Auth.getUser()
@@ -133,21 +134,13 @@ function MediaElement({
             </video>
           )}
           {item.type === 'audio' && (
-            <div
-              className={`rounded-xl px-4 py-3 ${
-                isMyMessage ? 'bg-kakao-yellow' : 'bg-white'
-              }`}
-            >
-              <audio src={item.url} controls className="w-full max-w-sm">
-                Your browser does not support the audio element.
-              </audio>
-              {item.duration && (
-                <p className="text-xs text-gray-500 mt-1">
-                  {Math.floor(item.duration / 60)}:
-                  {(item.duration % 60).toString().padStart(2, '0')}
-                </p>
-              )}
-            </div>
+            <AudioPlayer
+              src={item.url}
+              duration={item.duration}
+              fileName={item.fileName}
+              variant="compact"
+              className={isMyMessage ? 'bg-kakao-yellow' : 'bg-white'}
+            />
           )}
           {item.type === 'file' && (
             <div

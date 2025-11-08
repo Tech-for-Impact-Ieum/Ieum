@@ -221,8 +221,12 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     setShowEmojiModal(false)
   }
 
-  const handleVoiceInputSelect = async (text: string) => {
-    await sendMessageToAPI(text, [])
+  const handleVoiceInputSelect = async (
+    text: string,
+    audioMedia?: MediaItem,
+  ) => {
+    const media = audioMedia ? [audioMedia] : []
+    await sendMessageToAPI(text, media)
     setShowVoiceModal(false)
   }
 

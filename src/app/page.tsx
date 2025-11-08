@@ -9,7 +9,13 @@ import { Auth } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { CreateChatRoomModal } from '@/components/CreateChatRoomModal'
-import { initSocketClient, onUnreadCountUpdate } from '@/lib/socket-client'
+import { Message } from '@/lib/interface'
+import {
+  initSocketClient,
+  onUnreadCountUpdate,
+  onNewMessage,
+  joinRoom,
+} from '@/lib/socket-client'
 
 interface ChatRoom {
   id: number
@@ -55,20 +61,43 @@ export default function HomePage() {
     if (token) {
       initSocketClient(token)
 
-      // Listen for real-time unread count updates
-      const unsubscribe = onUnreadCountUpdate((data) => {
-        console.log('📊 Unread count update:', data)
-        setRooms((prev) =>
-          prev.map((room) =>
-            room.id === data.roomId
-              ? { ...room, unreadCount: data.unreadCount }
-              : room,
-          ),
-        )
+      // Listen for new messages to update lastMessage
+      const unsubscribeNewMessage = onNewMessage((message) => {
+        console.log('📨 New message in room list:', message)
+        setRooms((prev) => {
+          const updated = prev.map((room) => {
+            if (room.id === message.roomId) {
+              return {
+                ...room,
+                unreadCount: room.unreadCount + 1,
+                lastMessage: {
+                  id: message.id,
+                  text: message.text,
+                  senderId: message.senderId,
+                  senderName: message.senderName,
+                  createdAt: message.createdAt,
+                },
+                lastMessageAt: message.createdAt,
+              }
+            }
+            return room
+          })
+
+          // Sort by lastMessageAt (most recent first)
+          return updated.sort((a, b) => {
+            const timeA = new Date(
+              a.lastMessage?.createdAt || a.lastMessageAt || 0,
+            ).getTime()
+            const timeB = new Date(
+              b.lastMessage?.createdAt || b.lastMessageAt || 0,
+            ).getTime()
+            return timeB - timeA
+          })
+        })
       })
 
       return () => {
-        unsubscribe()
+        unsubscribeNewMessage()
       }
     }
   }, [router])
@@ -78,6 +107,9 @@ export default function HomePage() {
       setLoading(true)
       const data = await ApiClient.get('/chat/rooms')
       setRooms(data.rooms || [])
+      for (const room of data.rooms) {
+        joinRoom(room.id)
+      }
     } catch (error) {
       console.error('Failed to fetch chat rooms:', error)
     } finally {

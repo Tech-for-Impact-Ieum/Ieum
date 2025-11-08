@@ -41,12 +41,14 @@ export interface Friend {
 
 export interface MediaItem {
   type: 'audio' | 'image' | 'video' | 'file'
-  url: string
+  key: string // S3 파일 키 (DB 저장용)
+  url?: string // Signed URL (백엔드가 자동 생성, 표시용)
   fileName?: string
   fileSize?: number
   duration?: number // 음성/비디오
   width?: number // 이미지/비디오
   height?: number
+  mimeType?: string
 }
 
 export interface ReadByUser {
@@ -159,7 +161,7 @@ export class AppError extends Error {
   constructor(
     message: string,
     public code?: string,
-    public statusCode?: number
+    public statusCode?: number,
   ) {
     super(message)
     this.name = 'AppError'

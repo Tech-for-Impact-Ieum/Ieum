@@ -210,7 +210,7 @@ export async function uploadToS3(
     throw new Error(errorData.error || 'Presigned URL 요청에 실패했습니다.')
   }
 
-  const { uploadUrl, publicUrl } = await presignedResponse.json()
+  const { uploadUrl, fileKey } = await presignedResponse.json()
 
   // 3. Upload to S3 with progress tracking
   await new Promise<void>((resolve, reject) => {
@@ -254,9 +254,10 @@ export async function uploadToS3(
   // 4. Get metadata based on media type
   const mediaItem: MediaItem = {
     type: mediaType,
-    url: publicUrl,
+    key: fileKey, // Store S3 key for database
     fileName: file.name,
     fileSize: file.size,
+    mimeType: file.type,
   }
 
   try {

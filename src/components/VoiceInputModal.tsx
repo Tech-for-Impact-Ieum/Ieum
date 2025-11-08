@@ -32,11 +32,21 @@ export function VoiceInputModal({
   const mediaStreamRef = useRef<MediaStream | null>(null)
   const recordedChunksRef = useRef<BlobPart[]>([])
 
+  const MAX_RECORDING_TIME = 30 // 최대 30초
+
   useEffect(() => {
     let interval: NodeJS.Timeout
     if (isRecording) {
       interval = setInterval(() => {
-        setRecordingTime((prev) => prev + 1)
+        setRecordingTime((prev) => {
+          const newTime = prev + 1
+          // 30초 도달 시 자동 중지
+          if (newTime >= MAX_RECORDING_TIME) {
+            handleTranscribe()
+            return prev
+          }
+          return newTime
+        })
       }, 1000)
     } else {
       setRecordingTime(0)
@@ -211,15 +221,82 @@ export function VoiceInputModal({
           <DialogTitle className="text-center">음성입력</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col items-center gap-6 py-6">
-          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/10">
+          {/* Microphone Icon with Warning State */}
+          <div
+            className={`flex h-24 w-24 items-center justify-center rounded-full transition-all ${
+              isRecording && recordingTime >= 25
+                ? 'bg-red-500/20 ring-4 ring-red-500/50'
+                : isRecording
+                ? 'bg-primary/10'
+                : 'bg-gray-100'
+            }`}
+          >
             <Mic
-              className={`h-12 w-12 text-primary ${
-                isRecording ? 'animate-pulse' : ''
+              className={`h-12 w-12 transition-colors ${
+                isRecording && recordingTime >= 25
+                  ? 'text-red-500 animate-pulse'
+                  : isRecording
+                  ? 'text-primary animate-pulse'
+                  : 'text-gray-400'
               }`}
             />
           </div>
-          <div className="text-2xl font-semibold tabular-nums">
-            {formatTime(recordingTime)}
+
+          {/* Timer Display */}
+          <div className="flex flex-col items-center gap-2 w-full max-w-xs">
+            <div
+              className={`text-3xl font-bold tabular-nums transition-colors ${
+                isRecording && recordingTime >= 25
+                  ? 'text-red-600'
+                  : isRecording
+                  ? 'text-primary'
+                  : 'text-gray-700'
+              }`}
+            >
+              {formatTime(recordingTime)}
+            </div>
+
+            {/* Progress Bar */}
+            {isRecording && (
+              <div className="w-full space-y-1">
+                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      recordingTime >= 25
+                        ? 'bg-gradient-to-r from-red-500 to-red-600'
+                        : 'bg-gradient-to-r from-blue-500 to-purple-500'
+                    }`}
+                    style={{
+                      width: `${(recordingTime / MAX_RECORDING_TIME) * 100}%`,
+                    }}
+                  />
+                </div>
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>{recordingTime}초</span>
+                  <span
+                    className={
+                      recordingTime >= 25 ? 'text-red-600 font-semibold' : ''
+                    }
+                  >
+                    최대 {MAX_RECORDING_TIME}초
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Warning Message */}
+            {isRecording && recordingTime >= 25 && (
+              <div className="text-xs text-red-600 font-medium animate-pulse">
+                ⚠️ 곧 자동으로 녹음이 종료됩니다
+              </div>
+            )}
+
+            {/* Initial Guide */}
+            {!isRecording && !transcript && !isTranscribing && (
+              <div className="text-sm text-gray-500 text-center">
+                최대 {MAX_RECORDING_TIME}초까지 녹음 가능합니다
+              </div>
+            )}
           </div>
 
           {/* Transcription loading */}

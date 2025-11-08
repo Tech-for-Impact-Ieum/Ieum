@@ -10,7 +10,17 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'ieum-media.s3.ap-northeast-2.amazonaws.com',
+        hostname: 'picsum.photos',
+        pathname: '/800/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.soundhelix.com',
+        pathname: '/examples/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ieum-media-prod.s3.ap-northeast-2.amazonaws.com',
         pathname: '/**',
       },
       {

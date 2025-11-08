@@ -6,6 +6,7 @@ import { ActionButtons, Input } from '@/components/ui/Input'
 import { VoiceInputModal } from '@/components/VoiceInputModal'
 import { EmojiPickerModal } from '@/components/EmojiPickerModal'
 import { QuickResponseModal } from '@/components/QuickResponseModal'
+import { MediaUploader } from '@/components/MediaUploader'
 import { ChatRoom, MediaItem, Message } from '@/lib/interface'
 import { ChatHeader } from '@/components/Header'
 import { ChatElement } from '@/components/Chat'
@@ -34,6 +35,8 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
   const [showVoiceModal, setShowVoiceModal] = useState(false)
   const [showEmojiModal, setShowEmojiModal] = useState(false)
   const [showQuickResponseModal, setShowQuickResponseModal] = useState(false)
+  const [showMediaUploader, setShowMediaUploader] = useState(false)
+  const [pendingMedia, setPendingMedia] = useState<MediaItem[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -155,11 +158,18 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
 
   const handleSendMessage = async () => {
     console.log('inputMessage', inputMessage)
-    if (inputMessage.trim() && !isComposing && !isLoading) {
+    // Allow sending if there's text OR media
+    if (
+      (inputMessage.trim() || pendingMedia.length > 0) &&
+      !isComposing &&
+      !isLoading
+    ) {
       setIsLoading(true)
       try {
-        await sendMessageToAPI(inputMessage, [])
+        await sendMessageToAPI(inputMessage, pendingMedia)
         setInputMessage('')
+        setPendingMedia([])
+        setShowMediaUploader(false)
       } finally {
         setIsLoading(false)
       }
@@ -223,6 +233,20 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     setInputMessage('')
   }
 
+  const handleMediaUploadComplete = (media: MediaItem[]) => {
+    console.log('Media uploaded:', media)
+    setPendingMedia((prev) => [...prev, ...media])
+  }
+
+  const handleToggleMediaUploader = () => {
+    setShowMediaUploader((prev) => !prev)
+  }
+
+  const clearPendingMedia = () => {
+    setPendingMedia([])
+    setShowMediaUploader(false)
+  }
+
   useEffect(() => {
     if (bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth' })
@@ -256,7 +280,37 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
             setShowEmojiModal={setShowEmojiModal}
             setShowVoiceModal={setShowVoiceModal}
             setShowQuickResponseModal={setShowQuickResponseModal}
+            onMediaClick={handleToggleMediaUploader}
           />
+
+          {/* Media Uploader */}
+          {showMediaUploader && (
+            <div className="px-4 py-3 border-t border-gray-200">
+              <MediaUploader
+                onUploadComplete={handleMediaUploadComplete}
+                onUploadStart={() => console.log('Upload started')}
+                maxFiles={5}
+                acceptTypes="all"
+              />
+            </div>
+          )}
+
+          {/* Pending Media Preview */}
+          {pendingMedia.length > 0 && !showMediaUploader && (
+            <div className="px-4 py-2 border-t border-gray-200 bg-gray-50">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">
+                  📎 {pendingMedia.length}개 파일 첨부됨
+                </span>
+                <button
+                  onClick={clearPendingMedia}
+                  className="ml-auto text-xs text-red-600 hover:underline"
+                >
+                  삭제
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Message Input */}
           <div className="flex items-center gap-2 px-4 py-3">
@@ -266,7 +320,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
+                if (e.key === 'Enter' && !e.shiftKey && !isComposing) {
                   e.preventDefault()
                   handleSendMessage()
                 }
@@ -278,7 +332,9 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
             <Button
               size="icon"
               onClick={handleSendMessage}
-              disabled={!inputMessage.trim() || isLoading}
+              disabled={
+                (!inputMessage.trim() && pendingMedia.length === 0) || isLoading
+              }
               className="rounded-xl w-28"
             >
               <div className="text-2xl">

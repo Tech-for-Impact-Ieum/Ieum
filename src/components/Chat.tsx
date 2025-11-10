@@ -5,7 +5,13 @@ import { useState } from 'react'
 import { ImageLightbox } from './ImageLightbox'
 import { AudioPlayer } from './AudioPlayer'
 
-export function ChatElement({ message }: { message: Message }) {
+export function ChatElement({
+  message,
+  memberCount,
+}: {
+  message: Message
+  memberCount: number
+}) {
   const currentUser = Auth.getUser()
   const isMyMessage = currentUser ? message.senderId === currentUser.id : false
   const [lightboxOpen, setLightboxOpen] = useState(false)
@@ -28,7 +34,7 @@ export function ChatElement({ message }: { message: Message }) {
 
   // Calculate read status for my messages
   const readCount = message.readBy ? message.readBy.length : 0
-  const hasBeenRead = readCount > 0
+  const hasBeenRead = readCount > 1 // Exclude sender themselves
 
   const handleImageClick = (mediaIndex: number) => {
     // Find the index in imageMedia array
@@ -70,6 +76,7 @@ export function ChatElement({ message }: { message: Message }) {
             <TimeElement time={formattedTime} />
             {isMyMessage && (
               <ReadStatusElement
+                memberCount={memberCount}
                 readCount={readCount}
                 hasBeenRead={hasBeenRead}
               />
@@ -244,9 +251,11 @@ function TimeElement({ time }: { time: string }) {
 }
 
 function ReadStatusElement({
+  memberCount,
   readCount,
   hasBeenRead,
 }: {
+  memberCount: number
   readCount: number
   hasBeenRead: boolean
 }) {
@@ -268,7 +277,7 @@ function ReadStatusElement({
           clipRule="evenodd"
         />
       </svg>
-      {readCount > 1 ? `${readCount}명 읽음` : '읽음'}
+      {memberCount > 2 ? `${readCount - 1}명 읽음` : '읽음'}
     </span>
   )
 }

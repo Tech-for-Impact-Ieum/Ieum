@@ -11,12 +11,12 @@ import { ChatSummary } from '@/components/ChatSummary'
 import { ChatRoom, MediaItem, Message } from '@/lib/interface'
 import { ChatHeader } from '@/components/Header'
 import { ChatElement } from '@/components/Chat'
-import { ContextHelper } from '@/components/ContextHelper'
 import {
   initSocketClient,
   joinRoom,
   leaveRoom,
   onNewMessage,
+  onMessagesRead,
 } from '@/lib/socket-client'
 import { Auth } from '@/lib/auth'
 import React from 'react'
@@ -95,16 +95,35 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
           const data = await response.json()
           if (data.ok && data.messages) {
             setMessages(data.messages)
-            // Mark as read
-            await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/chat/rooms/${id}/read`,
-              {
-                method: 'POST',
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
-              },
-            )
+            // Mark as read - send the last message ID
+            if (data.messages.length > 0) {
+              const lastMessage = data.messages[data.messages.length - 1]
+              console.log(
+                `Marking messages in room ${id} as read (last message: ${lastMessage.id})...`,
+              )
+              try {
+                const readResponse = await fetch(
+                  `${process.env.NEXT_PUBLIC_API_URL}/chat/rooms/${id}/read`,
+                  {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                    body: JSON.stringify({
+                      messageId: lastMessage.id,
+                    }),
+                  },
+                )
+                const readData = await readResponse.json()
+                console.log('Mark as read response:', readData)
+                if (!readResponse.ok) {
+                  console.error('Failed to mark messages as read:', readData)
+                }
+              } catch (error) {
+                console.error('Error marking messages as read:', error)
+              }
+            }
           }
         }
       } catch (error) {
@@ -154,10 +173,34 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
       })
     })
 
+    // Listen for messages-read events
+    const unsubscribeMessagesRead = onMessagesRead((data) => {
+      console.log('✓ Messages read event:', data)
+      setMessages((prev) =>
+        prev.map((msg) => {
+          if (msg.id === data.messageId) {
+            // Add the user to readBy if not already there
+            const alreadyRead = msg.readBy.some((r) => r.userId === data.userId)
+            if (!alreadyRead) {
+              return {
+                ...msg,
+                readBy: [
+                  ...msg.readBy,
+                  { userId: data.userId, readAt: new Date().toISOString() },
+                ],
+              }
+            }
+          }
+          return msg
+        }),
+      )
+    })
+
     // Cleanup on unmount
     return () => {
       console.log('🧹 Cleaning up socket subscriptions...')
       unsubscribe()
+      unsubscribeMessagesRead()
       leaveRoom(numericRoomId)
     }
   }, [id, currentUserId, chatRoom?.id])
@@ -261,6 +304,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     if (bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth' })
     }
+    console.log(messages)
   }, [messages])
 
   return (
@@ -276,7 +320,11 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
         <div className="flex-1 overflow-y-auto bg-kakao-skyblue p-4">
           <div className="mx-auto flex max-w-2xl flex-col gap-3">
             {messages.map((message: Message) => (
-              <ChatElement key={message.id} message={message} />
+              <ChatElement
+                key={message.id}
+                message={message}
+                memberCount={chatRoom?.participantCount || 2}
+              />
             ))}
             <div ref={bottomRef} />
           </div>

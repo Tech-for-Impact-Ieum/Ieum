@@ -9,14 +9,7 @@ import { Auth } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { CreateChatRoomModal } from '@/components/CreateChatRoomModal'
-import { Message } from '@/lib/interface'
-import {
-  initSocketClient,
-  onUnreadCountUpdate,
-  onNewMessage,
-  joinRoom,
-  leaveRoom,
-} from '@/lib/socket-client'
+import { initSocketClient, onNewMessage, joinRoom } from '@/lib/socket-client'
 
 interface ChatRoom {
   id: number
@@ -157,17 +150,17 @@ export default function HomePage() {
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
         {/* Create Room Button */}
-        <div className="px-3 py-2 bg-gray-50 border-b">
+        <div className="px-5 py-2 bg-gray-50 border-b">
           <Button
             onClick={() => setShowCreateRoom(true)}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+            className="w-full bg-black text-white font-medium text-2xl rounded-2xl"
           >
             + 새 채팅방 만들기
           </Button>
         </div>
 
         {/* Chat Room List */}
-        <div className="flex-1 overflow-y-auto pb-20 px-3 bg-white">
+        <div className="flex-1 overflow-y-auto pb-20 px-3 bg-gray-50">
           {filteredRooms.length === 0 ? (
             <div className="text-center text-gray-500 mt-8">
               <p>채팅방이 없습니다</p>

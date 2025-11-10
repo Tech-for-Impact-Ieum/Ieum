@@ -112,22 +112,22 @@ export default function FriendsPage() {
 
   return (
     <>
-      <div className="flex h-full flex-col">
+      <div className="flex h-full flex-col ">
         <MenuHeader title="친구" />
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
         {/* Add Friend Button */}
-        <div className="px-3 py-2 bg-gray-50 border-b">
+        <div className="px-5 py-2 bg-gray-50 border-b">
           <Button
             onClick={() => setShowAddFriend(true)}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+            className="w-full bg-black text-white font-medium text-2xl rounded-2xl"
           >
             + 친구 추가
           </Button>
         </div>
 
         {/* Friends List */}
-        <div className="flex-1 px-3 pb-20 overflow-y-auto bg-white">
+        <div className="flex-1 px-3 pb-20 overflow-y-auto bg-gray-50">
           {filteredFriends.length === 0 ? (
             <div className="text-center text-gray-500 mt-8">
               <p>친구가 없습니다</p>
@@ -137,14 +137,18 @@ export default function FriendsPage() {
             filteredFriends.map((friend: User) => (
               <div
                 key={friend.id.toString()}
-                className="flex items-center justify-between py-3 border-b"
+                className="flex items-center justify-between py-3 border-b gap-4"
               >
-                <Profile id={friend.id} name={friend.name} />
+                <Profile
+                  id={friend.id}
+                  name={friend.name}
+                  email={friend.email}
+                  setting={friend.setting}
+                />
                 <Button
-                  size="sm"
                   variant="outline"
                   onClick={() => removeFriend(friend.id)}
-                  className="text-red-500 hover:bg-red-50"
+                  className="text-red-500 hover:bg-red-50 text-2xl h-full"
                 >
                   삭제
                 </Button>

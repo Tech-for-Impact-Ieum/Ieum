@@ -23,7 +23,7 @@ export function ChatRoomElement({
     <Link
       key={id}
       href={`/chat/${id}`}
-      className={`flex items-center gap-5 border-1 border-solid border-black transition-colors hover:kakao-yellow-dark px-4 py-4 mx-1 my-2 rounded-2xl hover:shadow-md transition-shadow cursor-pointer ${
+      className={`flex items-center gap-5 border-1 border-solid border-gray-400 transition-colors hover:kakao-yellow-dark px-4 py-4 mx-2 my-3 rounded-2xl hover:shadow-md transition-shadow cursor-pointer ${
         unread > 0 ? 'bg-kakao-yellow' : 'bg-white'
       }`}
     >

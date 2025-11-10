@@ -14,7 +14,7 @@ import {
 } from './interface'
 
 let socket: Socket | null = null
-let joinedRooms: Set<number> = new Set()
+const joinedRooms: Set<number> = new Set()
 
 export function initSocketClient(token?: string) {
   if (socket?.connected) {

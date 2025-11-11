@@ -91,7 +91,7 @@ function MediaPreviewItem({
           style={{ width: '120px', height: '120px' }}
         >
           <Image
-            src={item.url}
+            src={item.url || ''}
             alt={item.fileName || 'Image'}
             fill
             className="object-cover"

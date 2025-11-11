@@ -209,7 +209,7 @@ export function ImageLightbox({
           onClick={() => setIsZoomed(!isZoomed)}
         >
           <Image
-            src={currentImage.url}
+            src={currentImage.url || ''}
             alt={currentImage.fileName || 'Image'}
             width={currentImage.width || 1200}
             height={currentImage.height || 800}
@@ -251,7 +251,7 @@ export function ImageLightbox({
                 }`}
               >
                 <Image
-                  src={img.url}
+                  src={img.url || ''}
                   alt={`Thumbnail ${index + 1}`}
                   fill
                   className="object-cover"

@@ -54,6 +54,7 @@ export function ActionButton({
 }
 
 export function ActionButtons({
+  setShowSummaryModal,
   setShowEmojiModal,
   setShowVoiceModal,
   setShowQuickResponseModal,

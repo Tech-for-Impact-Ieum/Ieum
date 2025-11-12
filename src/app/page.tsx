@@ -9,7 +9,12 @@ import { Auth } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { CreateChatRoomModal } from '@/components/CreateChatRoomModal'
-import { initSocketClient, onNewMessage, joinRoom } from '@/lib/socket-client'
+import {
+  initSocketClient,
+  onNewMessage,
+  onMessagesRead,
+  joinRoom,
+} from '@/lib/socket-client'
 
 interface ChatRoom {
   id: number
@@ -90,8 +95,30 @@ export default function HomePage() {
         })
       })
 
+      // Listen for messages-read events to update unreadCount
+      const unsubscribeMessagesRead = onMessagesRead((data) => {
+        console.log('✓ Messages read in room list:', data)
+        const currentUserId = Auth.getUserId()
+
+        // Only update if the current user marked messages as read
+        if (data.userId === currentUserId) {
+          setRooms((prev) =>
+            prev.map((room) => {
+              if (room.id === data.roomId) {
+                return {
+                  ...room,
+                  unreadCount: 0, // Reset unread count when user reads messages
+                }
+              }
+              return room
+            }),
+          )
+        }
+      })
+
       return () => {
         unsubscribeNewMessage()
+        unsubscribeMessagesRead()
       }
     }
   }, [router])

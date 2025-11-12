@@ -1,6 +1,6 @@
 'use client'
 
-import { use, useEffect, useRef, useState } from 'react'
+import { use, useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { ActionButtons, Input } from '@/components/ui/Input'
 import { VoiceInputModal } from '@/components/VoiceInputModal'
@@ -95,35 +95,6 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
           const data = await response.json()
           if (data.ok && data.messages) {
             setMessages(data.messages)
-            // Mark as read - send the last message ID
-            if (data.messages.length > 0) {
-              const lastMessage = data.messages[data.messages.length - 1]
-              console.log(
-                `Marking messages in room ${id} as read (last message: ${lastMessage.id})...`,
-              )
-              try {
-                const readResponse = await fetch(
-                  `${process.env.NEXT_PUBLIC_API_URL}/chat/rooms/${id}/read`,
-                  {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      Authorization: `Bearer ${localStorage.getItem('token')}`,
-                    },
-                    body: JSON.stringify({
-                      messageId: lastMessage.id,
-                    }),
-                  },
-                )
-                const readData = await readResponse.json()
-                console.log('Mark as read response:', readData)
-                if (!readResponse.ok) {
-                  console.error('Failed to mark messages as read:', readData)
-                }
-              } catch (error) {
-                console.error('Error marking messages as read:', error)
-              }
-            }
           }
         }
       } catch (error) {
@@ -300,6 +271,41 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     setShowMediaUploader(false)
   }
 
+  const handleMarkMessagesAsRead = useCallback(async () => {
+    if (messages.length === 0) {
+      console.log('No messages to mark as read')
+      return
+    }
+
+    const lastMessage = messages[messages.length - 1]
+    console.log(
+      `Marking messages in room ${id} as read (last message: ${lastMessage.id})...`,
+    )
+
+    try {
+      const readResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/chat/rooms/${id}/read`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: JSON.stringify({
+            messageId: lastMessage.id,
+          }),
+        },
+      )
+      const readData = await readResponse.json()
+      console.log('Mark as read response:', readData)
+      if (!readResponse.ok) {
+        console.error('Failed to mark messages as read:', readData)
+      }
+    } catch (error) {
+      console.error('Error marking messages as read:', error)
+    }
+  }, [messages, id])
+
   useEffect(() => {
     if (bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth' })
@@ -324,6 +330,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
             }
             onClose={() => setShowSummary(false)}
             autoLoad={true}
+            onSummaryComplete={handleMarkMessagesAsRead}
           />
         )}
 

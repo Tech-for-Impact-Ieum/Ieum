@@ -14,23 +14,19 @@ interface ChatSummaryProps {
   roomId: number
   onClose?: () => void
   autoLoad?: boolean
+  onSummaryComplete: () => void
 }
 
 export function ChatSummary({
   roomId,
   onClose,
   autoLoad = true,
+  onSummaryComplete,
 }: ChatSummaryProps) {
   const [summary, setSummary] = useState<ChatSummaryType | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (autoLoad) {
-      loadSummary()
-    }
-  }, [roomId, autoLoad])
 
   const loadSummary = async () => {
     setIsLoading(true)
@@ -56,6 +52,7 @@ export function ChatSummary({
           await generateSummary()
         } else {
           setError(data.error || '요약을 불러오는데 실패했습니다.')
+          onSummaryComplete()
         }
         return
       }
@@ -63,9 +60,14 @@ export function ChatSummary({
       if (data.ok && data.summary) {
         setSummary(data.summary)
       }
+
+      // Summary loaded successfully, notify parent to mark messages as read
+      onSummaryComplete()
     } catch (e) {
       console.error('Failed to load summary:', e)
       setError('네트워크 오류가 발생했습니다.')
+      // Call callback even on error so messages can be marked as read
+      onSummaryComplete()
     } finally {
       setIsLoading(false)
     }
@@ -91,24 +93,32 @@ export function ChatSummary({
 
       if (!response.ok) {
         setError(data.error || '요약 생성에 실패했습니다.')
+        onSummaryComplete()
         return
       }
 
       if (data.ok && data.summary) {
         setSummary(data.summary)
       }
+
+      onSummaryComplete()
     } catch (e) {
       console.error('Failed to generate summary:', e)
       setError('네트워크 오류가 발생했습니다.')
+      onSummaryComplete()
     } finally {
       setIsGenerating(false)
     }
   }
 
-  if (error && !isLoading) {
-    return null
-  }
+  useEffect(() => {
+    if (autoLoad) {
+      loadSummary()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomId, autoLoad, onSummaryComplete])
 
+  // unused for 1st user test
   const closeButton = onClose && (
     <button
       onClick={onClose}
@@ -130,6 +140,43 @@ export function ChatSummary({
       </svg>
     </button>
   )
+
+  // unused for 1st user test
+  const regenerateButton = (
+    <Button
+      onClick={generateSummary}
+      disabled={isGenerating}
+      variant="outline"
+      className="w-full"
+    >
+      {isGenerating ? (
+        <span className="flex items-center gap-2">
+          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+          새 요약 생성 중...
+        </span>
+      ) : (
+        '새 요약 생성하기'
+      )}
+    </Button>
+  )
+
+  if (error && !isLoading) {
+    return null
+  }
 
   return (
     <div className="bg-white rounded-b-lg shadow-lg p-4 space-y-4">
@@ -224,43 +271,6 @@ export function ChatSummary({
               <AudioPlayer src={summary.audioUrl} variant="full" />
             </div>
           )}
-
-          {/* Regenerate Button */}
-          {/* <div className="pt-2">
-            <Button
-              onClick={generateSummary}
-              disabled={isGenerating}
-              variant="outline"
-              className="w-full"
-            >
-              {isGenerating ? (
-                <span className="flex items-center gap-2">
-                  <svg
-                    className="w-4 h-4 animate-spin"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  새 요약 생성 중...
-                </span>
-              ) : (
-                '새 요약 생성하기'
-              )}
-            </Button>
-          </div> */}
         </div>
       )}
 

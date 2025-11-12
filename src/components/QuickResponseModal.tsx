@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/Modal'
 import { QuickResponseButton } from '@/components/ui/Button'
 import { X } from 'lucide-react'
+import { useParams } from 'next/navigation'
 
 interface QuickResponseModalProps {
   open: boolean
@@ -21,6 +22,8 @@ export function QuickResponseModal({
 }: QuickResponseModalProps) {
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const params = useParams()
+  const roomId = params.id as string
 
   useEffect(() => {
     let aborted = false
@@ -29,11 +32,17 @@ export function QuickResponseModal({
       try {
         setIsLoading(true)
         setSuggestions([])
-        const res = await fetch('/api/chat/quick-replies', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages }),
-        })
+        const token = localStorage.getItem('token')
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/chat/rooms/${roomId}/quick-replies`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        )
         const data = await res.json()
         if (!aborted && res.ok && data.ok) {
           setSuggestions(data.suggestions || [])

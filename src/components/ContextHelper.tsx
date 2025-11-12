@@ -9,8 +9,10 @@ import {
 
 export function ContextHelper({
   messages,
+  roomId,
 }: {
   messages: { senderName: string; text: string }[]
+  roomId: string
 }) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -23,11 +25,18 @@ export function ContextHelper({
       try {
         setLoading(true)
         setSummary('')
-        const res = await fetch('/api/chat/summarize', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages }),
-        })
+        const token = localStorage.getItem('token')
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/chat/rooms/${roomId}/summarize`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ messages }),
+          },
+        )
         const data = await res.json()
         if (!aborted && res.ok && data.ok) {
           setSummary(data.summary || '')
@@ -42,7 +51,7 @@ export function ContextHelper({
     return () => {
       aborted = true
     }
-  }, [open, messages])
+  }, [open, messages, roomId])
 
   return (
     <div className="w-full">

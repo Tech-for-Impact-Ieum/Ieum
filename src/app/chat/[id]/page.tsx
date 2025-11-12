@@ -434,23 +434,6 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
         }))}
         onSelect={handleQuickResponseSelect}
       />
-      {/* Summary Modal */}
-      {/* 발달장애인용으로 보여주기 */}
-      {/* {showSummary && chatRoom && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl">
-            <ChatSummary
-              roomId={
-                typeof chatRoom.id === 'string'
-                  ? parseInt(chatRoom.id, 10)
-                  : chatRoom.id
-              }
-              onClose={() => setShowSummary(false)}
-              autoLoad={true}
-            />
-          </div>
-        </div>
-      )} */}
     </>
   )
 }

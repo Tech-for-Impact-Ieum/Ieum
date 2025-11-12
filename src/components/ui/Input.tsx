@@ -54,7 +54,6 @@ export function ActionButton({
 }
 
 export function ActionButtons({
-  setShowSummaryModal,
   setShowEmojiModal,
   setShowVoiceModal,
   setShowQuickResponseModal,
@@ -66,11 +65,19 @@ export function ActionButtons({
   setShowQuickResponseModal: (show: boolean) => void
   onMediaClick?: () => void
 }) {
+  /* FIXME: 1차 테스트에서 제외 */
+  const mediaButton = onMediaClick && (
+    <Button
+      variant="ghost"
+      size={null}
+      className="gap-2 cursor-pointer w-auto h-16 [&_svg]:size-auto bg-kakao-gray hover:text-white hover:bg-black active:text-white active:bg-black"
+      onClick={onMediaClick}
+    >
+      <Paperclip size={48} />
+    </Button>
+  )
   return (
     <div className="flex items-stretch gap-3 px-4 py-4 bg-white border-b border-gray-200">
-      {/* <ActionButton setShowModal={setShowSummaryModal} title="요약 보기">
-        <FileText size={48} />
-      </ActionButton> */}
       <ActionButton setShowModal={setShowEmojiModal} title="이모티콘">
         <Smile size={48} />
       </ActionButton>
@@ -82,17 +89,7 @@ export function ActionButtons({
       <ActionButton setShowModal={setShowQuickResponseModal} title="빠른 답장">
         <MessageSquarePlus size={48} />
       </ActionButton>
-      {/* FIXME: 1차 테스트에서 제외 */}
-      {/* {onMediaClick && (
-        <Button
-          variant="ghost"
-          size={null}
-          className="gap-2 cursor-pointer w-auto h-16 [&_svg]:size-auto bg-kakao-gray hover:text-white hover:bg-black active:text-white active:bg-black"
-          onClick={onMediaClick}
-        >
-          <Paperclip size={48} />
-        </Button>
-      )} */}
+      {/* {mediaButton} */}
     </div>
   )
 }

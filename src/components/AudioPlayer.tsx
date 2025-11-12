@@ -188,9 +188,7 @@ export function AudioPlayer({
 
   // Full variant
   return (
-    <div
-    // className={`flex flex-col gap-3 bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4 shadow-md ${className}`}
-    >
+    <div>
       <audio ref={audioRef} src={src} preload="metadata" />
 
       {/* File Name */}
@@ -261,49 +259,7 @@ export function AudioPlayer({
             </svg>
           )}
         </button>
-
-        {/* Progress Section */}
-        {/* <div className="flex-1 min-w-0">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-purple-700">
-              {formatDuration(currentTime)}
-            </span>
-            <span className="text-sm text-gray-500">
-              {formatDuration(audioDuration)}
-            </span>
-          </div>
-
-          <input
-            type="range"
-            min="0"
-            max={audioDuration}
-            value={currentTime}
-            onChange={handleSeek}
-            disabled={isLoading}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-500 disabled:cursor-not-allowed"
-            style={{
-              background: `linear-gradient(to right, #8b5cf6 0%, #8b5cf6 ${progress}%, #e5e7eb ${progress}%, #e5e7eb 100%)`,
-            }}
-          />
-        </div> */}
       </div>
-
-      {/* Waveform Visualization (Static) */}
-      {/* <div className="flex items-center justify-center gap-1 h-12">
-        {[...Array(30)].map((_, i) => (
-          <div
-            key={i}
-            className={`w-1 bg-gradient-to-t from-purple-400 to-blue-400 rounded-full transition-all ${
-              isPlaying ? 'animate-pulse' : ''
-            }`}
-            style={{
-              height: `${Math.random() * 60 + 20}%`,
-              opacity: i / 30 < progress / 100 ? 1 : 0.3,
-              animationDelay: `${i * 0.05}s`,
-            }}
-          />
-        ))}
-      </div> */}
     </div>
   )
 }

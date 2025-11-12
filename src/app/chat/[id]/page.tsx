@@ -304,7 +304,6 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     if (bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth' })
     }
-    console.log(messages)
   }, [messages])
 
   return (

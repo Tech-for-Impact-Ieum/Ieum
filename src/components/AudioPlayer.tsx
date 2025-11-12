@@ -189,7 +189,7 @@ export function AudioPlayer({
   // Full variant
   return (
     <div
-      className={`flex flex-col gap-3 bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4 shadow-md ${className}`}
+    // className={`flex flex-col gap-3 bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4 shadow-md ${className}`}
     >
       <audio ref={audioRef} src={src} preload="metadata" />
 
@@ -263,8 +263,7 @@ export function AudioPlayer({
         </button>
 
         {/* Progress Section */}
-        <div className="flex-1 min-w-0">
-          {/* Time Display */}
+        {/* <div className="flex-1 min-w-0">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium text-purple-700">
               {formatDuration(currentTime)}
@@ -274,7 +273,6 @@ export function AudioPlayer({
             </span>
           </div>
 
-          {/* Progress Bar */}
           <input
             type="range"
             min="0"
@@ -287,11 +285,11 @@ export function AudioPlayer({
               background: `linear-gradient(to right, #8b5cf6 0%, #8b5cf6 ${progress}%, #e5e7eb ${progress}%, #e5e7eb 100%)`,
             }}
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Waveform Visualization (Static) */}
-      <div className="flex items-center justify-center gap-1 h-12">
+      {/* <div className="flex items-center justify-center gap-1 h-12">
         {[...Array(30)].map((_, i) => (
           <div
             key={i}
@@ -305,7 +303,7 @@ export function AudioPlayer({
             }}
           />
         ))}
-      </div>
+      </div> */}
     </div>
   )
 }

@@ -315,6 +315,18 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
             <ChatHeader title={chatRoom.name} />
           </div>
         )}
+        {/* Chat Summary */}
+        {chatRoom && (
+          <ChatSummary
+            roomId={
+              typeof chatRoom.id === 'string'
+                ? parseInt(chatRoom.id, 10)
+                : chatRoom.id
+            }
+            onClose={() => setShowSummary(false)}
+            autoLoad={true}
+          />
+        )}
 
         {/* Messages List */}
         <div className="flex-1 overflow-y-auto bg-kakao-skyblue p-4">
@@ -424,7 +436,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
       />
       {/* Summary Modal */}
       {/* 발달장애인용으로 보여주기 */}
-      {showSummary && chatRoom && (
+      {/* {showSummary && chatRoom && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="w-full max-w-2xl">
             <ChatSummary
@@ -438,7 +450,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
             />
           </div>
         </div>
-      )}
+      )} */}
     </>
   )
 }

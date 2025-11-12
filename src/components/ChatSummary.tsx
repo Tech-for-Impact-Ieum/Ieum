@@ -109,7 +109,7 @@ export function ChatSummary({
     return null
   }
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4 space-y-4">
+    <div className="bg-white rounded-b-lg shadow-lg p-4 space-y-4">
       {/* Header */}
       {/* <div className="flex items-center justify-between pb-3">
         <div className="flex items-center gap-2">

@@ -277,7 +277,7 @@ export function ChatSummary({
 
           {/* TTS Audio Player */}
           {summary.audioUrl && (
-            <div>
+            <div className="h-full">
               <AudioPlayer src={summary.audioUrl} variant="full" />
             </div>
           )}

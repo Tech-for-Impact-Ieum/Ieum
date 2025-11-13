@@ -27,11 +27,15 @@ export function AudioPlayer({
   const [currentTime, setCurrentTime] = useState(0)
   const [audioDuration, setAudioDuration] = useState(duration || 0)
   const [isLoading, setIsLoading] = useState(true)
-  const [playbackRate, setPlaybackRate] = useState(1.0)
+  const [playbackRate, setPlaybackRate] = useState(0.8)
   const audioRef = useRef<HTMLAudioElement>(null)
-
+  const speedOptions = [0.8, 1.0, 1.2]
+  const speedLabels: { [key: number]: string } = {
+    0.8: '느리게',
+    1.0: '보통',
+    1.2: '빠르게',
+  }
   const handleSpeedChange = (increment: boolean) => {
-    const speedOptions = [0.6, 0.8, 1.0, 1.2, 1.4]
     const currentIndex = speedOptions.indexOf(playbackRate)
 
     if (increment && currentIndex < speedOptions.length - 1) {
@@ -105,6 +109,75 @@ export function AudioPlayer({
   }
 
   const progress = audioDuration > 0 ? (currentTime / audioDuration) * 100 : 0
+
+  const speedControlRelative = (
+    <div className="flex flex-col items-center gap-1">
+      {/* <div className="text-sm">속도 조절</div> */}
+      <div className="flex items-center gap-2 bg-gradient-to-r from-purple-50 to-blue-50 rounded-full px-2 py-1 shadow-sm">
+        {/* Slower Button */}
+        <button
+          onClick={() => handleSpeedChange(false)}
+          disabled={isLoading || playbackRate <= 0.6}
+          className="p-1.5 rounded-full bg-white text-gray-600 hover:bg-purple-100 hover:text-purple-600 active:bg-purple-200 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-600 transition-all"
+          aria-label="느리게"
+          title="느리게"
+        >
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            {/* Double triangle pointing left (rewind/slower) */}
+            <path d="M11 6v12l-8.5-6L11 6z" />
+            <path d="M21.5 6v12l-8.5-6 8.5-6z" />
+          </svg>
+        </button>
+
+        {/* Current Speed Display
+        <span className="text-xs font-medium text-gray-700 min-w-[2.5rem] text-center">
+          {playbackRate}x
+        </span> */}
+
+        {/* Faster Button */}
+        <button
+          onClick={() => handleSpeedChange(true)}
+          disabled={isLoading || playbackRate >= 1.4}
+          className="p-1.5 rounded-full bg-white text-gray-600 hover:bg-blue-100 hover:text-blue-600 active:bg-blue-200 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-600 transition-all"
+          aria-label="빠르게"
+          title="빠르게"
+        >
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            {/* Double triangle pointing right (fast-forward/faster) */}
+            <path d="M2.5 6v12l8.5-6-8.5-6zm10.5 0v12l8.5-6-8.5-6z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  )
+
+  const speedControlDropdown = (
+    <div className="relative">
+      <select
+        value={playbackRate}
+        onChange={(e) => setPlaybackRate(parseFloat(e.target.value))}
+        disabled={isLoading}
+        className="text-sm px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm"
+        aria-label="Playback speed"
+        style={{
+          WebkitAppearance: 'none',
+          MozAppearance: 'none',
+          appearance: 'none',
+          backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'right 0.5rem center',
+          backgroundSize: '1.5em 1.5em',
+          paddingRight: '2.5rem',
+        }}
+      >
+        {speedOptions.map((speed) => (
+          <option key={speed} value={speed}>
+            {speedLabels[speed]}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
 
   if (variant === 'compact') {
     return (
@@ -192,52 +265,7 @@ export function AudioPlayer({
       <audio ref={audioRef} src={src} preload="metadata" />
 
       {/* Speed Control */}
-      <div className="flex flex-col items-center gap-1">
-        {/* <div className="text-sm">속도 조절</div> */}
-        <div className="flex items-center gap-2 bg-gradient-to-r from-purple-50 to-blue-50 rounded-full px-2 py-1 shadow-sm">
-          {/* Slower Button */}
-          <button
-            onClick={() => handleSpeedChange(false)}
-            disabled={isLoading || playbackRate <= 0.6}
-            className="p-1.5 rounded-full bg-white text-gray-600 hover:bg-purple-100 hover:text-purple-600 active:bg-purple-200 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-600 transition-all"
-            aria-label="느리게"
-            title="느리게"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {/* Double triangle pointing left (rewind/slower) */}
-              <path d="M11 6v12l-8.5-6L11 6z" />
-              <path d="M21.5 6v12l-8.5-6 8.5-6z" />
-            </svg>
-          </button>
-
-          {/* Current Speed Display
-        <span className="text-xs font-medium text-gray-700 min-w-[2.5rem] text-center">
-          {playbackRate}x
-        </span> */}
-
-          {/* Faster Button */}
-          <button
-            onClick={() => handleSpeedChange(true)}
-            disabled={isLoading || playbackRate >= 1.4}
-            className="p-1.5 rounded-full bg-white text-gray-600 hover:bg-blue-100 hover:text-blue-600 active:bg-blue-200 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-600 transition-all"
-            aria-label="빠르게"
-            title="빠르게"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {/* Double triangle pointing right (fast-forward/faster) */}
-              <path d="M2.5 6v12l8.5-6-8.5-6zm10.5 0v12l8.5-6-8.5-6z" />
-            </svg>
-          </button>
-        </div>
-      </div>
+      {speedControlDropdown}
 
       {/* Play/Pause Button */}
       <button

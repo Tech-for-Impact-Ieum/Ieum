@@ -130,8 +130,11 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     // Listen for new messages from other users
     const unsubscribe = onNewMessage((message: Message) => {
       console.log('✓ Received new message:', message)
+      if (Number(message.roomId) !== Number(id)) {
+        console.log('  → Message not in this room, ignoring')
+        return
+      }
       setMessages((prev) => {
-        // Avoid duplicate messages
         if (
           prev.some((msg) => msg.id === message.id) ||
           message.senderId === currentUserId

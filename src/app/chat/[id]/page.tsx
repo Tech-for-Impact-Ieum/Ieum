@@ -17,6 +17,8 @@ import {
   leaveRoom,
   onNewMessage,
   onMessagesRead,
+  markMessagesAsRead,
+  isSocketConnected,
 } from '@/lib/socket-client'
 import { Auth } from '@/lib/auth'
 import React from 'react'
@@ -274,7 +276,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
     setShowMediaUploader(false)
   }
 
-  const handleMarkMessagesAsRead = useCallback(async () => {
+  const handleMarkMessagesAsRead = useCallback(() => {
     if (messages.length === 0) {
       console.log('No messages to mark as read')
       return
@@ -285,28 +287,11 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
       `Marking messages in room ${id} as read (last message: ${lastMessage.id})...`,
     )
 
-    try {
-      const readResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/chat/rooms/${id}/read`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-          body: JSON.stringify({
-            messageId: lastMessage.id,
-          }),
-        },
-      )
-      const readData = await readResponse.json()
-      console.log('Mark as read response:', readData)
-      if (!readResponse.ok) {
-        console.error('Failed to mark messages as read:', readData)
-      }
-    } catch (error) {
-      console.error('Error marking messages as read:', error)
-    }
+    // Convert roomId to number for socket
+    const numericRoomId = typeof id === 'string' ? parseInt(id, 10) : id
+
+    // Use socket connection to mark messages as read
+    markMessagesAsRead(numericRoomId, lastMessage.id)
   }, [messages, id])
 
   useEffect(() => {
@@ -314,6 +299,44 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth' })
     }
   }, [messages])
+
+  // Mark messages as read when user is viewing the chat room
+  useEffect(() => {
+    if (!currentUserId || messages.length === 0 || !chatRoom?.id) {
+      return
+    }
+
+    // Find the last message that's not sent by current user
+    const lastMessage = messages[messages.length - 1]
+    if (!lastMessage) return
+
+    // Don't mark as read if the last message is from current user
+    if (lastMessage.senderId === currentUserId) return
+
+    // Check if current user has already read this message
+    const alreadyRead = lastMessage.readBy.some(
+      (r) => r.userId === currentUserId,
+    )
+    if (alreadyRead) return
+
+    // Mark messages as read after a short delay (to ensure user actually sees them)
+    const timeoutId = setTimeout(() => {
+      const numericRoomId =
+        typeof chatRoom.id === 'string'
+          ? parseInt(chatRoom.id, 10)
+          : chatRoom.id
+
+      console.log(
+        `Auto-marking messages as read in room ${numericRoomId} (last message: ${lastMessage.id})`,
+      )
+
+      // Check socket connection status before marking as read
+      isSocketConnected()
+      markMessagesAsRead(numericRoomId, lastMessage.id)
+    }, 500)
+
+    return () => clearTimeout(timeoutId)
+  }, [messages, currentUserId, chatRoom?.id])
 
   return (
     <>

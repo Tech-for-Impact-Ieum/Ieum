@@ -33,8 +33,11 @@ export function ChatElement({
   const imageMedia = message.media.filter((item) => item.type === 'image')
 
   // Calculate read status for my messages
-  const readCount = message.readBy ? message.readBy.length : 0
-  const hasBeenRead = readCount > 1 // Exclude sender themselves
+
+  const readByOthers = message.readBy
+    ? message.readBy.filter((r) => r.userId !== message.senderId).length
+    : 0
+  const hasBeenRead = readByOthers > 0
 
   const handleImageClick = (mediaIndex: number) => {
     // Find the index in imageMedia array
@@ -77,7 +80,7 @@ export function ChatElement({
             {isMyMessage && (
               <ReadStatusElement
                 memberCount={memberCount}
-                readCount={readCount}
+                readCount={readByOthers}
                 hasBeenRead={hasBeenRead}
               />
             )}
@@ -277,7 +280,7 @@ function ReadStatusElement({
           clipRule="evenodd"
         />
       </svg>
-      {memberCount > 2 ? `${readCount - 1}명 읽음` : '읽음'}
+      {memberCount > 2 ? `${readCount}명 읽음` : '읽음'}
     </span>
   )
 }

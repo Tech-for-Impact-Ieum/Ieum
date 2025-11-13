@@ -105,7 +105,12 @@ export function ChatSummary({
     }
   }
 
-  if (error && !isLoading) {
+  useEffect(() => {
+    console.log('Chat Summary:', summary)
+  }, [summary])
+
+  /* error or no summary*/
+  if ((error && !isLoading) || (!summary && !isLoading && !error)) {
     return null
   }
 
@@ -129,6 +134,44 @@ export function ChatSummary({
         />
       </svg>
     </button>
+  )
+
+  const regerateButton = (
+    <div className="pt-2">
+      <Button
+        onClick={generateSummary}
+        disabled={isGenerating}
+        variant="outline"
+        className="w-full"
+      >
+        {isGenerating ? (
+          <span className="flex items-center gap-2">
+            <svg
+              className="w-4 h-4 animate-spin"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
+            </svg>
+            새 요약 생성 중...
+          </span>
+        ) : (
+          '새 요약 생성하기'
+        )}
+      </Button>
+    </div>
   )
 
   return (
@@ -161,9 +204,9 @@ export function ChatSummary({
         </div>
       )}
 
-      {/* Error State */}
+      {/* Error State, never reach here */}
       {error && !isLoading && (
-        <div className="bg-red-50 border border-red-200 rounded-b-lg p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <svg
               className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"
@@ -187,7 +230,7 @@ export function ChatSummary({
       {summary && !isLoading && (
         <div className="flex items-center gap-2">
           {/* Summary Text */}
-          <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-b-lg p-4 w-full">
+          <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg p-4 w-full">
             <div className="flex items-start gap-2">
               <svg
                 className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5"
@@ -224,43 +267,6 @@ export function ChatSummary({
               <AudioPlayer src={summary.audioUrl} variant="full" />
             </div>
           )}
-
-          {/* Regenerate Button */}
-          {/* <div className="pt-2">
-            <Button
-              onClick={generateSummary}
-              disabled={isGenerating}
-              variant="outline"
-              className="w-full"
-            >
-              {isGenerating ? (
-                <span className="flex items-center gap-2">
-                  <svg
-                    className="w-4 h-4 animate-spin"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  새 요약 생성 중...
-                </span>
-              ) : (
-                '새 요약 생성하기'
-              )}
-            </Button>
-          </div> */}
         </div>
       )}
 

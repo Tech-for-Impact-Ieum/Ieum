@@ -29,11 +29,11 @@ export function AudioPlayer({
   const [isLoading, setIsLoading] = useState(true)
   const [playbackRate, setPlaybackRate] = useState(0.8)
   const audioRef = useRef<HTMLAudioElement>(null)
-  const speedOptions = [0.8, 1.0, 1.2]
+  const speedOptions = [0.75, 1.0, 1.25]
   const speedLabels: { [key: number]: string } = {
-    0.8: '느리게',
-    1.0: '보통',
-    1.2: '빠르게',
+    [speedOptions[0]]: '느리게',
+    [speedOptions[1]]: '보통',
+    [speedOptions[2]]: '빠르게',
   }
   const handleSpeedChange = (increment: boolean) => {
     const currentIndex = speedOptions.indexOf(playbackRate)

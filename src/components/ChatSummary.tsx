@@ -187,7 +187,7 @@ export function ChatSummary({
     <div className="bg-white rounded-b-lg shadow-lg p-4 space-y-4">
       {/* Loading State */}
       {isLoading && (
-        <div className="flex items-center justify-center py-8">
+        <div className="flex items-center justify-center h-28">
           <div className="flex flex-col items-center gap-3">
             <svg
               className="w-10 h-10 text-purple-600 animate-spin"

@@ -54,11 +54,16 @@ export function ChatSummary({
           setError(data.error || '요약을 불러오는데 실패했습니다.')
           onSummaryComplete()
         }
-        return
       }
 
-      if (data.ok && data.summary) {
-        setSummary(data.summary)
+      if (data.ok) {
+        // Summary can be null if there aren't enough messages
+        if (data.summary) {
+          setSummary(data.summary)
+        } else {
+          // No summary available (not enough messages or disabled)
+          setSummary(null)
+        }
       }
 
       // Summary loaded successfully, notify parent to mark messages as read

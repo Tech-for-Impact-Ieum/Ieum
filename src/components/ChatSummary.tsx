@@ -118,6 +118,11 @@ export function ChatSummary({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomId, autoLoad, onSummaryComplete])
 
+  /* error or no summary*/
+  if ((error && !isLoading) || (!summary && !isLoading && !error)) {
+    return null
+  }
+
   // unused for 1st user test
   const closeButton = onClose && (
     <button
@@ -208,9 +213,9 @@ export function ChatSummary({
         </div>
       )}
 
-      {/* Error State */}
+      {/* Error State, never reach here */}
       {error && !isLoading && (
-        <div className="bg-red-50 border border-red-200 rounded-b-lg p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <svg
               className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"
@@ -234,7 +239,7 @@ export function ChatSummary({
       {summary && !isLoading && (
         <div className="flex items-center gap-2">
           {/* Summary Text */}
-          <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-b-lg p-4 w-full">
+          <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg p-4 w-full">
             <div className="flex items-start gap-2">
               <svg
                 className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5"

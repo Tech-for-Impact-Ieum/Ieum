@@ -69,6 +69,21 @@ export function getSocket() {
   return socket
 }
 
+export function isSocketConnected() {
+  const connected = socket?.connected || false
+  console.log(
+    `🔍 Socket connection status: ${
+      connected ? '✓ Connected' : '✗ Not connected'
+    }`,
+    {
+      socketExists: !!socket,
+      socketId: socket?.id,
+      connected,
+    },
+  )
+  return connected
+}
+
 export function disconnectSocket() {
   if (socket) {
     socket.disconnect()
@@ -254,7 +269,7 @@ export function onUnreadCountUpdate(
  */
 export function onMessagesRead(callback: (data: MessagesReadEvent) => void) {
   if (socket) {
-    socket.on('messages-read', callback)
+    socket.on('message-read', callback)
   }
 
   return () => {

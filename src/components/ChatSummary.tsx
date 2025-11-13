@@ -116,7 +116,7 @@ export function ChatSummary({
       loadSummary()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId, autoLoad, onSummaryComplete])
+  }, [roomId])
 
   /* error or no summary*/
   if ((error && !isLoading) || (!summary && !isLoading && !error)) {

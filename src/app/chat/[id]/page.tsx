@@ -37,7 +37,7 @@ export default function ChatRoomPage({ params }: ChatPageProps) {
   const [showEmojiModal, setShowEmojiModal] = useState(false)
   const [showQuickResponseModal, setShowQuickResponseModal] = useState(false)
   const [showMediaUploader, setShowMediaUploader] = useState(false)
-  const [showSummary, setShowSummary] = useState(false)
+  const [showSummary, setShowSummary] = useState(false) // unused
   const [pendingMedia, setPendingMedia] = useState<MediaItem[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)

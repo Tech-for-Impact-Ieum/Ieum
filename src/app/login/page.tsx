@@ -145,7 +145,8 @@ export default function LoginPage() {
           )}
 
           {/* Test Account Info */}
-          {isLogin && (
+          {/* FIXME: remove on user test */}
+          {/* {isLogin && (
             <div className="rounded-md bg-blue-50 p-4">
               <p className="text-xs text-blue-800 font-semibold mb-1">
                 테스트 계정:
@@ -155,7 +156,7 @@ export default function LoginPage() {
               </p>
               <p className="text-xs text-blue-700">daho@test.com / test1234</p>
             </div>
-          )}
+          )} */}
 
           <div>
             <Button

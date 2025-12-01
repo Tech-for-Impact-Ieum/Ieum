@@ -1,0 +1,30 @@
+import { ArrowLeft } from 'lucide-react'
+import { Button } from './ui/Button'
+import Link from 'next/link'
+
+export function MenuHeader({ title }: { title: string }) {
+  return (
+    <header className="sticky flex justify-center bg-white top-0 z-40 px-4 py-4">
+      <h1 className="text-3xl font-bold">{title}</h1>
+    </header>
+  )
+}
+
+export function ChatHeader({ title }: { title: string }) {
+  return (
+    <header className="bg-kakao-skyblue sticky top-0 z-40 flex items-center justify-between px-4 py-4 relative">
+      <Link href="/">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="[&_svg]:!w-8 [&_svg]:!h-8"
+        >
+          <ArrowLeft />
+        </Button>
+      </Link>
+      <h1 className="absolute left-1/2 -translate-x-1/2 font-semibold text-3xl">
+        {title}
+      </h1>
+    </header>
+  )
+}
